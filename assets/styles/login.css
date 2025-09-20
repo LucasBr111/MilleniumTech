@@ -1,0 +1,223 @@
+/* Variables de color de la marca (asegúrate de que estén en estilos-generales.css también) */
+:root {
+    --blanco-marmol: #F8F9FA;
+    --dorado-elegante: #D4AF37;
+    --bordo-profundo: #520017;
+    --verde-jade: #006B54;
+    --negro-futurista: #121212;
+    --gris-texto: #6c757d;
+}
+
+/* Fondo animado del cuerpo */
+.auth-body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden; /* Evitar scroll si la animación es grande */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--blanco-marmol); /* Fallback */
+}
+
+.background-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--blanco-marmol) 0%, var(--dorado-elegante) 25%, var(--bordo-profundo) 50%, var(--verde-jade) 75%, var(--blanco-marmol) 100%);
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
+    z-index: -1; /* Detrás del contenido */
+    opacity: 0.1; /* Transparencia para que sea sutil */
+}
+
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Contenedor principal de autenticación */
+.auth-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px; /* Ancho máximo para el formulario */
+    margin: 20px;
+    perspective: 1000px; /* Para la animación 3D de volteo si la añadimos */
+}
+
+/* Tarjetas de formulario */
+.auth-card {
+    background-color: var(--blanco-marmol);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    padding: 30px;
+    text-align: center;
+    transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
+    position: absolute; /* Para superponer y ocultar */
+    top: 0;
+    left: 0;
+    width: 100%;
+    backface-visibility: hidden; /* Ocultar la parte trasera en la animación 3D */
+    opacity: 0;
+    transform: rotateY(180deg); /* Inicialmente girado para la transición */
+}
+
+.auth-card.active {
+    opacity: 1;
+    transform: rotateY(0deg);
+    position: relative; /* Para que ocupe espacio cuando esté activo */
+}
+
+/* Cabecera del formulario */
+.auth-header {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.auth-logo {
+    max-width: 80px;
+    margin-bottom: 15px;
+}
+
+.auth-title {
+    font-family: 'Cinzel', serif;
+    font-size: 2.2rem;
+    color: var(--negro-futurista);
+    margin-bottom: 5px;
+}
+
+.auth-subtitle {
+    font-size: 1rem;
+    color: var(--gris-texto);
+}
+
+.back-link {
+    position: absolute;
+    left: 0;
+    top: 10px;
+    color: var(--negro-futurista);
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: var(--dorado-elegante);
+}
+
+/* Grupos de formulario con iconos */
+.form-group {
+    text-align: left;
+}
+
+.form-label {
+    color: var(--negro-futurista);
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.input-icon-group {
+    position: relative;
+}
+
+.input-icon-group .form-control {
+    padding-left: 40px; /* Espacio para el icono izquierdo */
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-icon-group .form-control:focus {
+    border-color: var(--dorado-elegante);
+    box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25);
+}
+
+.input-icon-group .icon-left {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gris-texto);
+    pointer-events: none; /* Para que el input sea clickeable a través del icono */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gris-texto);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+    color: var(--negro-futurista);
+}
+
+/* Links y botones */
+.forgot-password-link, .auth-switch-link {
+    color: var(--dorado-elegante);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.forgot-password-link:hover, .auth-switch-link:hover {
+    color: var(--bordo-profundo);
+    text-decoration: underline;
+}
+
+.auth-btn {
+    background-color: var(--bordo-profundo);
+    color: var(--blanco-marmol);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.auth-btn:hover {
+    background-color: var(--verde-jade);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    color: var(--blanco-marmol);
+}
+
+/* Pie de formulario */
+.auth-footer {
+    margin-top: 30px;
+    font-size: 0.9rem;
+    color: var(--gris-texto);
+}
+
+/* Mensajes de feedback */
+.form-text {
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+.text-success { color: var(--verde-jade) !important; }
+.text-danger { color: var(--bordo-profundo) !important; }
+.text-warning { color: var(--dorado-elegante) !important; }
+
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .auth-title {
+        font-size: 1.8rem;
+    }
+    .auth-subtitle {
+        font-size: 0.9rem;
+    }
+    .auth-card {
+        padding: 25px;
+    }
+}

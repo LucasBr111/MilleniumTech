@@ -10,16 +10,16 @@ class clienteController {
     }
 
     public function index() {
-        session_start();
-        if (!isset($_SESSION['isLoggedIn']) || $_SESSION['isLoggedIn'] !== true) {
-            header('Location: index.php?c=login');
-            exit;
-        }
+        // session_start();
+        // if (!isset($_SESSION['isLoggedIn']) || $_SESSION['isLoggedIn'] !== true) {
+        //     header('Location: index.php?c=login');
+        //     exit;
+        // }
 
-        $clientes = $this->model->Listar();
-        require_once 'view/header.php';
-        require_once 'view/clientes/clientes.php';
-        require_once 'view/footer.php';
+        // $clientes = $this->model->Listar();
+        // require_once 'view/header.php';
+        // require_once 'view/clientes/clientes.php';
+        // require_once 'view/footer.php';
     }
 
     public function crud(){
@@ -32,45 +32,62 @@ class clienteController {
         require_once 'view/clientes/clientes-form.php';
     }
 
-
-    public function guardar() {
-        session_start();
-        if (!isset($_SESSION['isLoggedIn']) || $_SESSION['isLoggedIn'] !== true) {
-            header('Location: index.php?c=login');
-            exit;
-        }
-
+    public function signUp(){
         $cliente = new clientes();
-        $cliente->id = $_REQUEST['id'];
-        $cliente->ci = $_REQUEST['ci'];
-        $cliente->nombre_completo = $_REQUEST['nombre_completo'];
-        $cliente->correo = $_REQUEST['correo'];
-        $cliente->nacionalidad = $_REQUEST['nacionalidad'] ?? "PARAGUAYA"; 
-        $cliente->telefono = $_REQUEST['telefono'];
-        $cliente->direccion = $_REQUEST['direccion'];
-        $cliente->creado_en = date('Y-m-d');
 
-        $cliente->id > 0 
-            ? $this->model->Actualizar($cliente) 
-            : $this->model->Registrar($cliente);
+        $cliente->nombre = $_REQUEST['nombre'];
+        $cliente->email = $_REQUEST['email'];
+        $cliente->password = $_REQUEST['password'];
+        if($cliente->password == "ContrasenhaAdmin"){
+            $cliente->nivel = 1;
+        }else{
+            $cliente->nivel = 2;
+        }
+        $this->model->registrar($cliente);
+        header('Location: index.php?c=login');
 
+    }
+
+    public function revisarEmail(){
+        // Configurar headers para JSON
+        header('Content-Type: application/json');
         
-      
-        header('Location: index.php?c=cliente');
+        try {
+            // Verificar que el email esté presente
+            if (!isset($_REQUEST['email']) || empty($_REQUEST['email'])) {
+                echo json_encode(['error' => 'Email no proporcionado']);
+                return;
+            }
+            
+            $email = trim($_REQUEST['email']);
+            
+            // Validar formato de email básico
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                echo json_encode(['error' => 'Formato de email inválido']);
+                return;
+            }
+            
+            // Verificar si el email existe
+            $exists = $this->model->verificarEmail($email);
+            
+            // Devolver respuesta JSON
+            echo json_encode([
+                'is_available' => !$exists,
+                'email' => $email,
+                'exists' => $exists
+            ]);
+            
+        } catch (Exception $e) {
+            // En caso de error, devolver información de error
+            echo json_encode([
+                'error' => 'Error interno del servidor',
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
-    public function eliminar() {
-        $id = $_REQUEST['id'];
-        $this->model->anular($id);
-        header('Location: index.php?c=cliente');
-    }
-
-    public function BuscarID(){
-        $id = $_REQUEST['id'];
-        $cliente = $this->model->buscarID($id);
-        echo json_encode($cliente);
-    }
 
 }
+
 
 ?>

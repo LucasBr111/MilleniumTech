@@ -1,5 +1,6 @@
 <?php
-require_once 'model/usuarios.php';
+require_once "model/clientes.php";
+
 class loginController {
 
     private $user;
@@ -9,40 +10,76 @@ class loginController {
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        $this->user = new usuarios();
+        $this->user = new clientes();
     }
 
     public function index() {
-        // Si ya está logueado, redirigir al inicio
-        // if (isset($_SESSION['isLoggedIn']) && $_SESSION['isLoggedIn'] === true) {
-        //     header('Location: index.php?c=home');
-        //     exit;
-        // }
         require_once "view/login.php";
     }
 
     public function login() {
-        $usuario = new usuarios();
-        $usuario->nombre = $_POST['nombre'];
-        $usuario->pass = $_POST['pass'];
-    
-        $result = $this->user->login($usuario);
-    
+        // Configurar headers para JSON
         header('Content-Type: application/json');
-    
-        if ($result) {
-            if (session_status() == PHP_SESSION_NONE) session_start();
-    
-            $user = $this->user->obtener($usuario->pass);
-    
-            $_SESSION['nombre'] = $user->nombre;
-            $_SESSION['isLoggedIn'] = true;
-            $_SESSION['nivel'] = $user->nivel;
-            $_SESSION['user_id'] = $user->id;
-    
-            echo json_encode(['status' => 'success', 'message' => 'Login exitoso']);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Usuario o contraseña incorrectos']);
+        
+        try {
+            // Verificar que los datos estén presentes
+            if (!isset($_POST['email']) || !isset($_POST['password'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Email y contraseña son requeridos']);
+                return;
+            }
+            
+            $email = trim($_POST['email']);
+            $password = trim($_POST['password']);
+            
+            // Validar formato de email
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                echo json_encode(['status' => 'error', 'message' => 'Formato de email inválido']);
+                return;
+            }
+            
+            // Crear objeto cliente para el login
+            $cliente = new clientes();
+            $cliente->email = $email;
+            $cliente->password = $password;
+            
+            // Intentar hacer login
+            $result = $this->user->login($cliente);
+            
+            if ($result) {
+                // Iniciar sesión si no está iniciada
+                if (session_status() == PHP_SESSION_NONE) {
+                    session_start();
+                }
+                
+                // Obtener datos del usuario
+                $user = $this->user->obtener($cliente->email);
+                
+                if ($user) {
+                    // Guardar datos en sesión
+                    $_SESSION['nombre'] = $user->nombre;
+                    $_SESSION['email'] = $user->email;
+                    $_SESSION['isLoggedIn'] = true;
+                    $_SESSION['nivel'] = $user->nivel;
+                    $_SESSION['user_id'] = $user->id;
+                    
+                    echo json_encode([
+                        'status' => 'success', 
+                        'message' => 'Login exitoso',
+                        'user' => [
+                            'nombre' => $user->nombre,
+                            'email' => $user->email,
+                            'nivel' => $user->nivel
+                        ]
+                    ]);
+                } else {
+                    echo json_encode(['status' => 'error', 'message' => 'Error al obtener datos del usuario']);
+                }
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Email o contraseña incorrectos']);
+            }
+            
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => 'Error interno del servidor: ' . $e->getMessage()]);
         }
         exit;
     }
@@ -61,6 +98,6 @@ class loginController {
         session_destroy();
         
         // Redireccionar al inicio con mensaje de sesión cerrada
-        header('Location: index.php?c=login');
+        header('Location: index.php?c=home');
     }
 }

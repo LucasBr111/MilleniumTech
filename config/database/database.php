@@ -1,7 +1,7 @@
 <?php
 define("USER", "root");
 define("PASS", "");
-define("DB", "R&F_AUTOMOTORES");
+define("DB", "million_tech");
 define("HOST", "localhost");
 
 class Database

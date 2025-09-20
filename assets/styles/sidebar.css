@@ -1,269 +1,62 @@
-/* Tema unificado: Red Velocity & Champagne Gold */
 :root {
-    --rv-bg: rgba(250, 250, 250, 1); /* fondo principal */
-    --rv-red: rgba(237, 28, 36, 1); /* rojo dinamico */
-    --rv-gold: rgba(212, 180, 90, 1); /* dorado champagne */
-    --rv-slate: rgba(64, 64, 64, 1); /* gris pizarra */
-    --rv-silver: rgba(225, 225, 225, 1); /* plata clara */
-    --rv-white: #ffffff;
+    --blanco-marmol2: #f1f1f1;
+    --dorado-elegante: #D4AF37;
+    --bordo-profundo: #520017;
+    --verde-jade: #006B54;
+    --negro-futurista: #121212;
+}
+/* Estilos globales del body y html */
+html, body {
+    height: 100%;
 }
 
-
 body {
-    font-family: 'Montserrat', 'Lato', sans-serif;
-    background-color: var(--rv-bg);
+    /* Fondo elegante con textura de mármol sutil */
+    background-color: var(--blanco-marmol2);
+    
     overflow-x: hidden;
     margin: 0;
     padding: 0;
-    height: 100%;
-/*     min-height: 100vh; */
+    font-family: 'Montserrat', 'Lato', sans-serif;
+    color: var(--negro-futurista);
 }
 
-/* Wrapper principal */
+/* Estilos del contenedor principal 'wrapper' */
 .wrapper {
-    display: flex;
-    align-items: stretch;
-    perspective: 1500px;
-}
-
-/* Estilo del sidebar */
-.sidebar {
-    height: 100vh;
-    min-width: 260px;
-    max-width: 260px;
-    background: var(--rv-slate);
-    color: var(--rv-white);
-    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease;
-    transform-origin: left center;
-    position: sticky;
-    top: 0;
-}
-
-.sidebar.active {
-    transform: translateX(-100%);
-}
-
-/* Contenido principal */
-#content {
-    width: 100%;
-    padding: 24px;
     min-height: 100vh;
-    transition: margin-left 0.3s ease;
-    background-color: var(--rv-bg);
-}
-
-/* Navbar */
-.navbar {
-    padding: 14px 14px;
-    background: var(--rv-white);
-    border: none;
-    border-radius: 10px;
-    margin-bottom: 24px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-}
-
-/* Estilo del logo */
-.sidebar-header .logo {
-    max-width: 100%;
-    height: auto;
-    width: 80px; /* Ajusta el tamaño del logo */
-    object-fit: contain; /* Evita distorsiones */
-    margin-right: 10px; /* Espaciado entre el logo y el texto */
-    display: block;
-}
-
-.sidebar-header h3 {
-    margin-top: 10px; /* Espaciado entre el logo y el título */
-    font-size: 14px; /* Ajusta el tamaño del texto */
-    color: var(--rv-white);
-    font-weight: 700;
-    white-space: nowrap;
-    transition: opacity 0.3s ease;
-}
-
-.sidebar.active .sidebar-header h3 {
-    opacity: 0;
-}
-
-.toggle-btn {
-    color: var(--rv-white);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    margin-right: 15px;
-    transition: transform 0.3s ease;
-}
-
-.sidebar.collapse .toggle-btn {
-    transform: rotate(180deg);
-}
-
-.sidebar-menu {
-    padding: 10px 0;
-    list-style: none;
-    margin: 0;
-}
-
-.sidebar-menu li {
-    position: relative;
-    margin: 8px 0;
-    transition: all 0.3s ease;
-}
-
-.sidebar-menu li a {
     display: flex;
-    align-items: center;
-    padding: 10px 16px;
-    color: var(--rv-white);
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border-left: 2px solid transparent;
-    white-space: nowrap;
+    /* Transición para un movimiento suave al abrir/cerrar el sidebar */
+    transition: margin-left 0.4s ease-in-out;
 }
 
-.sidebar-menu li a:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-left: 2px solid var(--rv-gold);
+/* Estilos del contenido principal 'content' */
+#content {
+    /* Padding para separar el contenido de los bordes */
+    padding: 2rem !important;
+    /* Ajuste para el efecto de "desplazamiento" */
+    transition: margin-left 0.4s ease-in-out;
 }
 
-.sidebar-menu li a.active {
-    background: rgba(255, 255, 255, 0.1);
-    border-left: 2px solid var(--rv-gold);
+/* Clases de Bootstrap personalizadas para el color del texto */
+.text-gold {
+    color: var(--dorado-elegante) !important;
 }
 
-.sidebar-menu li a i {
-    font-size: 20px;
-    min-width: 30px;
-    text-align: center;
+.text-burgundy {
+    color: var(--bordo-profundo) !important;
 }
 
-.sidebar-menu li a span {
-    margin-left: 10px;
-    opacity: 1;
-    transition: opacity 0.3s ease;
+.text-jade {
+    color: var(--verde-jade) !important;
 }
 
-.sidebar.active .sidebar-menu li a span {
-    opacity: 0;
+/* Estilos para los títulos principales de la página */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', 'Lato', sans-serif;
+    color: var(--negro-futurista);
 }
 
-/* Tooltip para sidebar activa */
-.sidebar.active .sidebar-menu li {
-    position: relative;
-}
-
-.sidebar.active .sidebar-menu li a::after {
-    position: absolute;
-    content: attr(data-tooltip);
-    left: 60px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: var(--bordo-profundo);
-    color: var(--blanco);
-    padding: 5px 10px;
-    border-radius: 4px;
-    z-index: 1;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-    white-space: nowrap;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.sidebar.active .sidebar-menu li a:hover::after {
-    opacity: 1;
-}
-
-/* Hover animation */
-.sidebar-menu li a::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: var(--dorado-universitario);
-    transition: width 0.3s ease;
-}
-
-.sidebar-menu li a:hover::before {
-    width: 100%;
-}
-
-/* Animación para iconos */
-.sidebar-menu li a i {
-    transform: scale(1);
-    transition: transform 0.3s ease;
-}
-
-.sidebar-menu li a:hover i {
-    transform: scale(1.2);
-    color: var(--rv-gold);
-}
-
-
-.sidebar-footer {
-    bottom: 0;
-    position: relative;
-    width: 100%;
-    padding: 10px 20px;
-    color: var(--rv-white);
-    border-top: 1px solid rgba(255,255,255,0.1);
-    font-size: 12px;
-    text-align: center;
-}
-
-.sidebar.active .sidebar-footer {
-    opacity: 0;
-}
-
-/* Media queries */
-@media (max-width: 992px) {
-    .sidebar {
-        transform: translateX(-100%);
-    }
-    
-    .sidebar.active {
-        transform: translateX(0);
-    }
-    
-    #content {
-        width: 100%;
-        margin-left: 0;
-    }
-    
-    .sidebar.active ~ #content {
-        margin-left: 0;
-    }
-}
-
-/* Navbar temática */
-.navbar .nav-link {
-    color: var(--rv-slate);
-}
-.navbar .nav-link:hover {
-    color: var(--rv-red);
-}
-.navbar .btn, .btn {
-    border-radius: 10px;
-}
-.btn-primary {
-    background-color: var(--rv-red);
-    border-color: var(--rv-red);
-}
-.btn-primary:hover { filter: brightness(0.92); }
-.btn-success { background-color: #2fb36f; border-color: #2fb36f; }
-.btn-success:hover { filter: brightness(0.92); }
-
-/* Tarjetas/Tablas */
-.table {
-    --bs-table-color: var(--rv-slate);
-    --bs-table-bg: var(--rv-white);
-}
-.table thead th {
-    color: var(--rv-slate);
-    border-bottom: 2px solid var(--rv-silver);
-}
-.table-striped>tbody>tr:nth-of-type(odd)>* {
-    --bs-table-accent-bg: rgba(225,225,225,0.35);
+/* Reglas generales para íconos */
+.fa, .fas, .fab {
+    transition: color 0.3s ease;
 }

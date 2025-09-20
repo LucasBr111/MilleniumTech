@@ -7,7 +7,7 @@ if (session_status() == PHP_SESSION_NONE) {
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>R&F Automotores</title>
+    <title>Millenium Tech ✨</title>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +17,9 @@ if (session_status() == PHP_SESSION_NONE) {
     =============================== -->
     <!-- Font Awesome (iconos) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
 
     <!-- Google Fonts: Montserrat y Lato -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -115,8 +118,7 @@ if (session_status() == PHP_SESSION_NONE) {
             font-size: 12px;
         }
     </style>
-<body class="bg-dark text-white">
+<body>
     <div class="d-flex wrapper" id="wrapper">
-        <?php include "sidebar.php"; ?>
         <div id="content" class="flex-grow-1 p-4">
             <?php include "navbar.php"; ?>
