@@ -228,7 +228,7 @@
     
     // Determinar si la acción es "agregar" o "eliminar"
     var action = button.find('i').hasClass('text-danger') ? 'remove' : 'add';
-    var url = 'index.php?c=productos&a=' + action + 'favorito';
+    var url = 'index.php?c=favoritos&a=' + action;
     
     $.ajax({
         url: url,
@@ -237,13 +237,18 @@
         dataType: 'json',
         success: function(response) {
             if (response.success) {
-                if (action === 'add') {
-                    button.find('i').removeClass('far').addClass('fas text-danger');
-                   console.log(response.success);
-                } else {
-                    // Si se eliminó, cambia el icono a vacío y gris
-                    button.find('i').removeClass('fas text-danger').addClass('far');
-                }
+                 if (action === 'add') {
+                     button.find('i').removeClass('far').addClass('fas text-danger');
+                     console.log(response.success);
+                 } else {
+                     // Si se eliminó, cambia el icono a vacío y gris
+                     button.find('i').removeClass('fas text-danger').addClass('far');
+                 }
+                 
+                 // Actualizar contadores en el navbar
+                 if (typeof updateFavoritesCounter === 'function') {
+                     updateFavoritesCounter();
+                 }
             } else if (response.error) {
                 Swal.fire({
                     icon: 'error',

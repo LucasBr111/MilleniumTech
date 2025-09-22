@@ -58,4 +58,41 @@ class favoritos
             throw $e;
         }
     }
+
+    public function listarProductosFavoritos($id_cliente)
+    {
+        try {
+            $sql = "SELECT p.* FROM favoritos f
+                    LEFT JOIN productos p ON p.id_producto = f.id_producto
+                    WHERE f.id_cliente = ?";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$id_cliente]);
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function contarPorCliente($id_cliente){
+        try {
+            $sql = "SELECT COUNT(*) as total FROM favoritos WHERE id_cliente = ?";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(array($id_cliente));
+            $result = $stmt->fetch(PDO::FETCH_OBJ);
+            return $result->total;
+        } catch (Exception $e) {
+            error_log("Error en contar favoritos: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    public function limpiar($id_cliente){
+        try{
+            $sql = "DELETE FROM favoritos WHERE id_cliente = ?";
+            $this->pdo->prepare($sql)
+                 ->execute(array($id_cliente));
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
 }

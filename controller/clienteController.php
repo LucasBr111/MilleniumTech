@@ -1,12 +1,18 @@
 <?php 
 
 require_once 'model/clientes.php';
+require_once 'model/carrito.php';
+require_once 'model/favoritos.php';
 
 class clienteController {
     private $model;
+    private $carrito;
+    private $favoritos;
 
     public function __construct() {
         $this->model = new clientes();
+        $this->carrito = new carrito();
+        $this->favoritos = new favoritos();
     }
 
     public function index() {
@@ -85,6 +91,27 @@ class clienteController {
             ]);
         }
     }
+
+    public function Contaritems() {
+        header('Content-Type: application/json');
+    
+        try {
+            $id_cliente = (int) $_GET['id_cliente'];
+
+            // Consultar al modelo
+            $cartCount = $this->carrito->contarPorCliente($id_cliente) ?? 0;
+            $favCount  = $this->favoritos->contarPorCliente($id_cliente) ?? 0;
+    
+            echo json_encode([
+                'cart' => $cartCount,
+                'favorites' => $favCount
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
+    
 
 
 }

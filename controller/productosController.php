@@ -45,6 +45,13 @@ class productosController
 
         require_once './view/productos/productos-editar.php';
     }
+    public function favoritos()
+    {
+        $id_cliente = $_SESSION['user_id'];
+        $productos = $this->favoritos->listarProductosFavoritos($id_cliente);
+        require_once 'view/header.php';
+        require_once './view/productos/productos-favoritos.php';
+    }
 
     public function guardar()
     {

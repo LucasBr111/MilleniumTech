@@ -44,8 +44,9 @@
                 </a>
             </li>
             <li class="nav-item me-2">
-                <a class="nav-link nav-icon-circle" href="index.php?c=favoritos&a=index">
+                <a class="nav-link nav-icon-circle" href="index.php?c=productos&a=favoritos">
                     <i class="fas fa-heart"></i>
+                    <span class="badge favorites-count">0</span>
                 </a>
             </li>
             <li class="nav-item dropdown">
@@ -94,7 +95,7 @@
                 <a class="nav-link" href="index.php?c=carrito&a=index"><i class="fas fa-shopping-cart me-2"></i>Carrito <span class="badge rounded-pill bg-dark">0</span></a>
             </li>
             <li class="nav-item my-2">
-                <a class="nav-link" href="index.php?c=favoritos&a=index"><i class="fas fa-heart me-2"></i>Favoritos</a>
+                <a class="nav-link" href="index.php?c=productos&a=favoritos"><i class="fas fa-heart me-2"></i>Favoritos <span class="badge rounded-pill bg-danger favorites-count-mobile">0</span></a>
             </li>
             <li class="nav-item dropdown my-2">
                 <a class="nav-link dropdown-toggle" href="#" id="mobileUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -117,6 +118,82 @@
             </li>
         </ul>
     </div>
+    
+<!-- Mobile Bottom Bar -->
+<div class="mobile-bottom-bar d-lg-none">
+    <div class="bottom-nav-container">
+        <a href="index.php?c=home&a=index" class="bottom-nav-item active">
+            <div class="bottom-nav-icon">
+                <i class="fas fa-home"></i>
+            </div>
+            <span class="bottom-nav-label">Inicio</span>
+        </a>
+
+        <a href="#" class="bottom-nav-item" id="mobile-search-trigger">
+            <div class="bottom-nav-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <span class="bottom-nav-label">Buscar</span>
+        </a>
+
+        <a href="index.php?c=productos&a=favoritos" class="bottom-nav-item">
+            <div class="bottom-nav-icon">
+                <i class="fas fa-heart"></i>
+                <span class="fav-count empty">0</span>
+            </div>
+            <span class="bottom-nav-label">Favoritos</span>
+        </a>
+
+        <a href="index.php?c=carrito&a=index" class="bottom-nav-item">
+            <div class="bottom-nav-icon">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count empty"></span>
+            </div>
+            <span class="bottom-nav-label">Carrito</span>
+        </a>
+
+        <a href="#" class="bottom-nav-item" data-bs-toggle="dropdown">
+            <div class="bottom-nav-icon">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <span class="bottom-nav-label">Perfil</span>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+                <?php if (isset($_SESSION['isLoggedIn']) && $_SESSION['isLoggedIn'] === true): ?>
+                    <li><a class="dropdown-item" href="index.php?c=user&a=profile">Mi Perfil</a></li>
+                    <li><a class="dropdown-item" href="index.php?c=pedidos&a=index">Mis Pedidos</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="index.php?c=login&a=logout">Cerrar Sesión</a></li>
+                <?php else: ?>
+                    <li><a class="dropdown-item" href="index.php?c=login&a=index">Iniciar Sesión</a></li>
+                    <li><a class="dropdown-item" href="index.php?c=register&a=index">Registrarse</a></li>
+                <?php endif; ?>
+            </ul>
+        </a>
+    </div>
+</div>
+
+<!-- Mobile Search Overlay -->
+<div class="mobile-search-overlay" id="mobile-search-overlay">
+    <div class="mobile-search-container">
+        <div class="mobile-search-header">
+            <h5 style="color: var(--negro-futurista); margin: 0;">Buscar productos</h5>
+            <button class="mobile-search-close" id="mobile-search-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form class="mobile-search-form" action="index.php" method="GET">
+            <input type="hidden" name="c" value="productos">
+            <input type="hidden" name="a" value="buscar">
+            <input type="search" name="query" placeholder="¿Qué estás buscando?" required>
+            <button type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
+</div>
 </div>
 
 <style>
@@ -375,4 +452,93 @@
             background-color: transparent;
         }
     }
+    
+    /* Estilos para contadores */
+    .nav-icon-circle {
+        position: relative;
+    }
+    
+    .nav-icon-circle .badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #dc3545;
+        color: white;
+        border-radius: 50%;
+        min-width: 18px;
+        height: 18px;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+    
+    .nav-icon-circle .badge.empty {
+        display: none;
+    }
+    
+    .favorites-count-mobile {
+        background-color: #dc3545 !important;
+        color: white !important;
+    }
 </style>
+<script>
+    // Update counters function
+    function updateCounters() {
+        $.ajax({
+            url: 'index.php?c=contadores&a=obtenerContadores',
+            method: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    const contadores = response.contadores;
+                    const cartItems = contadores.carrito || 0;
+                    const favItems = contadores.favoritos || 0;
+
+                    // Desktop counters
+                    const $cartCount = $('.cart-count');
+                    const $favCount = $('.favorites-count');
+
+                    // Update cart counter
+                    if (cartItems > 0) {
+                        $cartCount.removeClass('empty').text(cartItems > 99 ? '99+' : cartItems);
+                    } else {
+                        $cartCount.addClass('empty').text('');
+                    }
+
+                    // Update favorites counter
+                    if (favItems > 0) {
+                        $favCount.removeClass('empty').text(favItems > 99 ? '99+' : favItems);
+                    } else {
+                        $favCount.addClass('empty').text('');
+                    }
+
+                    // Mobile counters
+                    const $favCountMobile = $('.favorites-count-mobile');
+                    if (favItems > 0) {
+                        $favCountMobile.text(favItems > 99 ? '99+' : favItems);
+                    } else {
+                        $favCountMobile.text('');
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al obtener contadores:', error);
+            }
+        });
+    }
+
+    // Initialize counters when document is ready
+    $(document).ready(function() {
+        updateCounters();
+        
+        // Update counters every 30 seconds
+        setInterval(updateCounters, 30000);
+    });
+
+    // Function to update counters after adding/removing favorites
+    function updateFavoritesCounter() {
+        updateCounters();
+    }
+</script>
