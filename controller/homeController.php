@@ -18,9 +18,16 @@ class homeController{
 
 
     public function index(){
-        $productos = $this->model->Listar();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        // Obtener ID del cliente si está logueado
+        $ID_CLIENTE = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+        
+        $productos = $this->model->Listar($ID_CLIENTE);
         $categorias = $this->categorias->listar();
-        $productos_destacados = $this->model->ProductosDestacados();
+        $productos_destacados = $this->model->ProductosDestacados($ID_CLIENTE);
 
         require_once 'view/header.php';
         // require_once 'view/sidebar.php';

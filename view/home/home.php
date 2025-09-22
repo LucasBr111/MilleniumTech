@@ -27,36 +27,39 @@
             </div>
         </div>
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mt-3">
-            <?php if (!empty($productos_destacados)): ?>
-                <?php foreach ($productos_destacados as $producto): ?>
-                    <div class="col">
-                        <div class="product-card">
-                            <div class="product-image-container">
-                                <img src="assets/uploads/productos/<?php echo $producto->imagen ?>" class="img-fluid" alt="<?= $producto->nombre_producto ?>">
-                                <span class="stock-badge <?= ($producto->stock > 0) ? 'bg-success' : 'bg-danger' ?>">
-                                    <?= ($producto->stock > 0) ? 'En Stock' : 'Sin Stock' ?>
-                                </span>
-                            </div>
-                            <div class="product-info">
-                                <h5 class="product-title"><?= htmlspecialchars($producto->nombre_producto) ?></h5>
-                                <p class="product-price">
-                                    <span class="currency-symbol">Gs.</span>
-                                    <?= number_format($producto->precio, 0, ',', '.') ?>
-                                </p>
-                                <div class="product-actions d-flex justify-content-between align-items-center mt-3">
-                                    <button class="btn btn-add-cart" data-id="<?= $producto->id_producto ?>">Añadir al carrito</button>
-                                    <button class="btn btn-fav" id="favBtn" data-id="<?= $producto->id_producto ?>"><i class="fas fa-heart"></i></button>
-                                </div>
-                            </div>
+    <?php if (!empty($productos_destacados)): ?>
+        <?php foreach ($productos_destacados as $producto): ?>
+            <div class="col">
+                <div class="product-card">
+                    <div class="product-image-container">
+                        <img src="assets/uploads/productos/<?php echo $producto->imagen ?>" class="img-fluid" alt="<?= $producto->nombre_producto ?>">
+                        <span class="stock-badge <?= ($producto->stock > 0) ? 'bg-success' : 'bg-danger' ?>">
+                            <?= ($producto->stock > 0) ? 'En Stock' : 'Sin Stock' ?>
+                        </span>
+                    </div>
+                    <div class="product-info">
+                        <h5 class="product-title"><?= htmlspecialchars($producto->nombre_producto) ?></h5>
+                        <p class="product-price">
+                            <span class="currency-symbol">Gs.</span>
+                            <?= number_format($producto->precio, 0, ',', '.') ?>
+                        </p>
+                        <div class="product-actions d-flex justify-content-between align-items-center mt-3">
+                            <button class="btn btn-add-cart" data-id="<?= $producto->id_producto ?>">Añadir al carrito</button>
+                            
+                            <button class="btn btn-fav" data-id="<?= $producto->id_producto ?>">
+                                <i class="<?= ($producto->es_favorito !== null) ? 'fas text-danger' : 'far' ?> fa-heart"></i>
+                            </button>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="col-12 text-center">
-                    <p class="text-muted">No hay productos destacados disponibles en este momento.</p>
                 </div>
-            <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <div class="col-12 text-center">
+            <p class="text-muted">No hay productos destacados disponibles en este momento.</p>
         </div>
+    <?php endif; ?>
+</div>
     </section>
 
 
@@ -202,47 +205,67 @@
         // Inicializa el carrusel al cargar la página
         updateCarousel();
     });
-
     $(document).on('click', '.btn-fav', function() {
-        var id = $(this).data('id');
+    var button = $(this);
+    var id = button.data('id');
+    var isLoggedIn = <?= isset($_SESSION['isLoggedIn']) && $_SESSION['isLoggedIn'] ? 'true' : 'false' ?>;
 
-        // Esta variable se "inyecta" desde PHP
-        var isLoggedIn = <?= isset($_SESSION['isLoggedIn']) ? 'true' : 'false' ?>;
+    if (!isLoggedIn) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Debes iniciar sesión',
+            text: 'Para añadir productos a favoritos necesitas iniciar sesión.',
+            confirmButtonText: 'Ir al login'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "index.php?c=login";
+            }
+        });
+        return;
+    }
 
-        if (!isLoggedIn) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Debes iniciar sesión',
-                text: 'Para añadir productos a favoritos necesitas iniciar sesión.',
-                confirmButtonText: 'Ir al login'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "index.php?c=login";
+    button.prop('disabled', true);
+    
+    // Determinar si la acción es "agregar" o "eliminar"
+    var action = button.find('i').hasClass('text-danger') ? 'remove' : 'add';
+    var url = 'index.php?c=productos&a=' + action + 'favorito';
+    
+    $.ajax({
+        url: url,
+        method: 'POST',
+        data: { id_producto: id },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                if (action === 'add') {
+                    button.find('i').removeClass('far').addClass('fas text-danger');
+                   console.log(response.success);
+                } else {
+                    // Si se eliminó, cambia el icono a vacío y gris
+                    button.find('i').removeClass('fas text-danger').addClass('far');
                 }
-            });
-            return;
-        }
-
-        // Si está logueado → hace la petición Ajax
-        $.ajax({
-            url: 'index.php?c=favoritos&a=add',
-            method: 'POST',
-            data: { id_producto: id },
-            success: function(response) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Añadido',
-                    text: 'El producto fue añadido a tus favoritos'
-                });
-            },
-            error: function() {
+            } else if (response.error) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'No se pudo añadir a favoritos, intenta de nuevo'
+                    text: response.error
                 });
             }
-        });
+        },
+        error: function(xhr) {
+            var errorMessage = 'Error en la petición.';
+            if (xhr.responseJSON && xhr.responseJSON.error) {
+                errorMessage = xhr.responseJSON.error;
+            }
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: errorMessage
+            });
+        },
+        complete: function() {
+            button.prop('disabled', false);
+        }
     });
-    
+});
 </script>

@@ -123,18 +123,34 @@ class Productos
     }
 
     // ======================
-    // Listar todos
+    // Listar todos colocarle like por cliente
     // ======================
-    public function Listar()
+    public function Listar($id_cliente = null)
     {
         try {
-            $stm = $this->pdo->prepare("SELECT * FROM productos");
-            $stm->execute();
+            if ($id_cliente !== null) {
+                // Si hay cliente → traer favoritos de ese cliente
+                $sql = "SELECT p.*, f.id AS es_favorito
+                        FROM productos p
+                        LEFT JOIN favoritos f 
+                            ON f.id_producto = p.id_producto 
+                           AND f.id_cliente = ?";
+                $stm = $this->pdo->prepare($sql);
+                $stm->execute([$id_cliente]);
+            } else {
+                // Si no hay cliente logueado → no traer favoritos
+                $sql = "SELECT p.* 
+                        FROM productos p";
+                $stm = $this->pdo->prepare($sql);
+                $stm->execute();
+            }
+    
             return $stm->fetchAll(PDO::FETCH_OBJ);
         } catch (Exception $e) {
             die($e->getMessage());
         }
     }
+    
 
     // ======================
     // Eliminar
@@ -149,15 +165,31 @@ class Productos
         }
     }
     
-    public function ProductosDestacados() {
+    public function ProductosDestacados($id_cliente = null) {
         try {
-            $stm = $this->pdo->prepare("SELECT * FROM productos WHERE destacado = 1");
-            $stm->execute();
+            if ($id_cliente !== null) {
+                // Si hay cliente → traer favoritos de ese cliente
+                $sql = "SELECT p.*, f.id AS es_favorito
+                        FROM productos p
+                        LEFT JOIN favoritos f 
+                            ON f.id_producto = p.id_producto 
+                           AND f.id_cliente = ?
+                        WHERE p.destacado = 1";
+                $stm = $this->pdo->prepare($sql);
+                $stm->execute([$id_cliente]);
+            } else {
+                // Si no hay cliente logueado → no traer favoritos
+                $sql = "SELECT p.* 
+                        FROM productos p
+                        WHERE p.destacado = 1";
+                $stm = $this->pdo->prepare($sql);
+                $stm->execute();
+            }
+            
             return $stm->fetchAll(PDO::FETCH_OBJ);
         } catch (Exception $e) {
             die($e->getMessage());
         }
-        
     }
     public function RegistrarImagenGaleria($id_producto, $ruta_imagen) {
         try {
