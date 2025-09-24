@@ -1,646 +1,534 @@
-<?php
-// Verificar que el usuario esté logueado
-if (!isset($_SESSION['user_id'])) {
-    header('Location: index.php?c=login');
-    exit;
-}
-?>
-
-<style>
-    /* Estilos Específicos para la Vista de Carrito */
-    :root {
-        --blanco-marmol: #F8F9FA;
-        --dorado-elegante: #D4AF37;
-        --bordo-profundo: #520017;
-        --verde-jade: #006B54;
-        --negro-futurista: #121212;
-        --gris-claro: #EFEFEF;
-        --gris-texto: #6c757d;
-    }
-
-    .cart-container {
-        max-width: 1200px;
-        margin: 40px auto;
-        padding: 25px;
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        border-radius: 20px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
-        border: 1px solid rgba(212, 175, 55, 0.1);
-    }
-
-    .cart-header {
-        background: linear-gradient(135deg, var(--verde-jade), #005a4a);
-        color: white;
-        padding: 25px;
-        border-radius: 15px;
-        margin-bottom: 30px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .cart-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 100px;
-        height: 100%;
-        background: linear-gradient(45deg, var(--dorado-elegante), #f4d03f);
-        opacity: 0.1;
-        transform: skewX(-20deg);
-    }
-
-    .cart-title {
-        font-family: 'Cinzel', serif;
-        font-weight: 700;
-        font-size: 2rem;
-        margin: 0;
-        position: relative;
-        z-index: 1;
-        color: var(--blanco-marmol);
-    }
-
-    .cart-count {
-        font-size: 1rem;
-        opacity: 0.9;
-        font-weight: 300;
-        display: block;
-        margin-top: 5px;
-    }
-
-    .cart-clear-btn {
-        color: white;
-        text-decoration: none;
-        font-size: 0.95rem;
-        font-weight: 500;
-        background: rgba(255, 255, 255, 0.1);
-        padding: 8px 16px;
-        border-radius: 25px;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .cart-clear-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        transform: translateY(-2px);
-    }
-
-    /* Tarjeta de producto del carrito */
-    .cart-product-card {
-        background: white;
-        border-radius: 16px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-        position: relative;
-    }
-
-    .cart-product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-    }
-
-    .product-image-container {
-        position: relative;
-        overflow: hidden;
-        border-radius: 12px;
-    }
-
-    .product-image {
-        width: 100%;
-        height: 120px;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
-
-    .product-image:hover {
-        transform: scale(1.05);
-    }
-
-    .stock-badge {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-
-    .stock-badge.in-stock {
-        background: var(--verde-jade);
-        color: white;
-    }
-
-    .stock-badge.low-stock {
-        background: var(--dorado-elegante);
-        color: var(--negro-futurista);
-    }
-
-    .stock-badge.no-stock {
-        background: #dc3545;
-        color: white;
-    }
-
-    .product-details h5 {
-        font-weight: 600;
-        color: var(--negro-futurista);
-        margin-bottom: 8px;
-    }
-
-    .product-code {
-        font-size: 0.85rem;
-        color: var(--gris-texto);
-        background: var(--gris-claro);
-        padding: 2px 6px;
-        border-radius: 4px;
-    }
-
-    .product-brand {
-        font-size: 0.9rem;
-        color: var(--bordo-profundo);
-        font-weight: 500;
-    }
-
-    .quantity-control {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        margin-bottom: 15px;
-    }
-
-    .btn-quantity-minus,
-    .btn-quantity-plus {
-        width: 35px;
-        height: 35px;
-        border: 2px solid var(--dorado-elegante);
-        background: white;
-        color: var(--dorado-elegante);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        transition: all 0.3s ease;
-    }
-
-    .btn-quantity-minus:hover,
-    .btn-quantity-plus:hover {
-        background: var(--dorado-elegante);
-        color: white;
-    }
-
-    .btn-quantity-minus:disabled,
-    .btn-quantity-plus:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .quantity {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--negro-futurista);
-        min-width: 30px;
-        text-align: center;
-    }
-
-    .product-price {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--verde-jade);
-        margin: 0;
-    }
-
-    .action-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .remove-item-btn {
-        background: #dc3545;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-    }
-
-    .remove-item-btn:hover {
-        background: #c82333;
-        transform: translateY(-2px);
-    }
-
-    .add-to-cart-btn {
-        background: var(--verde-jade);
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-    }
-
-    .add-to-cart-btn:hover:not(:disabled) {
-        background: #005a4a;
-        transform: translateY(-2px);
-    }
-
-    .add-to-cart-btn:disabled {
-        background: #6c757d;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    .cart-summary {
-        background: linear-gradient(135deg, var(--bordo-profundo), #6d001d);
-        color: white;
-        padding: 25px;
-        border-radius: 15px;
-        margin-top: 30px;
-        text-align: center;
-    }
-
-    .subtotal-label {
-        font-size: 1.1rem;
-        font-weight: 500;
-        display: block;
-        margin-bottom: 10px;
-    }
-
-    .subtotal-value {
-        font-size: 2rem;
-        font-weight: 700;
-        font-family: 'Cinzel', serif;
-    }
-
-    .checkout-btn {
-        background: var(--dorado-elegante);
-        color: var(--negro-futurista);
-        border: none;
-        padding: 15px 30px;
-        border-radius: 25px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin-top: 20px;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    .checkout-btn:hover {
-        background: #f4d03f;
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
-        color: var(--negro-futurista);
-        text-decoration: none;
-    }
-
-    .empty-list {
-        text-align: center;
-        padding: 60px 20px;
-        color: var(--gris-texto);
-    }
-
-    .empty-icon {
-        font-size: 4rem;
-        color: var(--gris-claro);
-        margin-bottom: 20px;
-    }
-
-    .empty-list h4 {
-        color: var(--negro-futurista);
-        margin-bottom: 10px;
-    }
-
-    .removing {
-        opacity: 0.5;
-        transform: scale(0.95);
-    }
-
-    @media (max-width: 768px) {
-        .cart-container {
-            margin: 20px;
-            padding: 15px;
-        }
-        
-        .cart-product-card {
-            padding: 15px;
-        }
-        
-        .product-image {
-            height: 100px;
-        }
-    }
-</style>
-
+<link rel="stylesheet" href="assets/styles/carrito.css">
 <div class="cart-container">
     <div class="cart-header">
-        <h1 class="cart-title">
-            <i class="fas fa-shopping-cart me-2"></i>
-            Mi Carrito
-        </h1>
-        <span class="cart-count" id="cart-count"><?= count($productos) ?> productos</span>
-        
-        <?php if (!empty($productos)): ?>
-            <a href="#" id="clear-cart-list" class="cart-clear-btn">
-                <i class="fas fa-trash me-1"></i>
-                Limpiar carrito
-            </a>
-        <?php endif; ?>
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h3 class="cart-title">Mi Carrito de Compras</h3>
+                <span class="cart-count-display" id="items-count">(<?= count($productos ?? []) ?> productos seleccionados)</span>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="#" id="clear-cart" class="cart-clear-btn">
+                    <i class="fas fa-trash-alt me-1"></i>
+                    Vaciar carrito
+                </a>
+            </div>
+        </div>
     </div>
 
-    <?php if (!empty($productos)): ?>
-        <?php foreach ($productos as $producto): ?>
+    <div id="cart-products-container">
+        <?php if (!empty($productos)): ?>
             <?php
-            // Determinar estado del stock
-            $stockStatus = '';
-            $stockText = '';
-            $isDisabled = false;
+            $subtotal = 0;
+            foreach ($productos as $item):
+                $producto = $item->producto ?? $item; // Flexibilidad en la estructura de datos
+                $cantidad = $item->cantidad ?? 1;
+                $precio_unitario = $producto->precio;
+                $precio_total = $precio_unitario * $cantidad;
+                $subtotal += $precio_total;
 
-            if ($producto->stock <= 0) {
-                $stockStatus = 'no-stock';
-                $stockText = 'Sin stock';
-                $isDisabled = true;
-            } elseif ($producto->stock <= 5) {
-                $stockStatus = 'low-stock';
-                $stockText = 'Últimas unidades';
-            } else {
-                $stockStatus = 'in-stock';
-                $stockText = 'Disponible';
-            }
+                // Estado del stock
+                $stockStatus = '';
+                $stockText = '';
+                $isDisabled = false;
+
+                if ($producto->stock <= 0) {
+                    $stockStatus = 'no-stock';
+                    $stockText = 'Sin stock';
+                    $isDisabled = true;
+                } elseif ($producto->stock <= 5) {
+                    $stockStatus = 'low-stock';
+                    $stockText = 'Stock bajo';
+                } else {
+                    $stockStatus = 'in-stock';
+                    $stockText = 'Disponible';
+                }
             ?>
+                <div class="cart-product-card" data-id="<?= htmlspecialchars($producto->id_producto) ?>">
+                    <!-- Badge de stock -->
+                    <div class="stock-badge <?= $stockStatus ?>"><?= $stockText ?></div>
 
-            <div class="cart-product-card" data-id="<?= htmlspecialchars($producto->id_producto) ?>">
-                <!-- Badge de stock -->
-                <div class="stock-badge <?= $stockStatus ?>"><?= $stockText ?></div>
-
-                <div class="row align-items-center">
-                    <!-- Columna de imagen -->
-                    <div class="col-md-3 col-sm-4">
-                        <div class="product-image-container">
-                            <img src="assets/uploads/productos/<?= htmlspecialchars($producto->imagen) ?>"
-                                alt="<?= htmlspecialchars($producto->nombre_producto) ?>"
-                                class="product-image">
-                        </div>
-                    </div>
-
-                    <!-- Columna de detalles del producto -->
-                    <div class="col-md-4 col-sm-8">
-                        <div class="product-details">
-                            <h5><?= htmlspecialchars($producto->nombre_producto) ?></h5>
-                            <p class="mb-2">
-                                <span class="product-code">ID: <?= htmlspecialchars($producto->id_producto) ?></span>
-                            </p>
-                            <p class="mb-0">
-                                <span class="product-brand"><?= htmlspecialchars($producto->marca) ?></span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Columna de cantidad y precio -->
-                    <div class="col-md-3 col-sm-6">
-                        <div class="text-center mb-3">
-                            <div class="quantity-control mx-auto mb-3"
-                                data-stock="<?= $producto->stock ?>"
-                                data-id="<?= $producto->id_producto ?>">
-                                <button class="btn-quantity-minus" <?= $isDisabled ? 'disabled' : '' ?>>-</button>
-                                <span class="quantity"><?= $producto->cantidad ?></span>
-                                <button class="btn-quantity-plus" <?= $isDisabled ? 'disabled' : '' ?>>+</button>
+                    <div class="row align-items-center">
+                        <!-- Columna de imagen -->
+                        <div class="col-md-2 col-sm-3">
+                            <div class="product-image-container">
+                                <img src="assets/uploads/productos/<?= htmlspecialchars($producto->imagen) ?>"
+                                    alt="<?= htmlspecialchars($producto->nombre_producto) ?>"
+                                    class="product-image">
                             </div>
-                            <p class="product-price">Gs. <?= number_format($producto->precio, 0, ',', '.') ?></p>
+                        </div>
+
+                        <!-- Columna de detalles del producto -->
+                        <div class="col-md-4 col-sm-9">
+                            <div class="product-details">
+                                <h5><?= htmlspecialchars($producto->nombre_producto) ?></h5>
+                                <p class="mb-2">
+                                    <span class="product-code">SKU: <?= htmlspecialchars($producto->id_producto) ?></span>
+                                    <span class="product-brand ms-2"><?= htmlspecialchars($producto->marca) ?></span>
+                                </p>
+                                <div class="product-unit-price">
+                                    <span class="price-label">Precio unitario:</span>
+                                    <span class="unit-price">Gs. <?= number_format($precio_unitario, 0, ',', '.') ?></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna de cantidad -->
+                        <div class="col-md-2 col-sm-6">
+                            <div class="quantity-section">
+                                <label class="quantity-label">Cantidad</label>
+                                <div class="quantity-control"
+                                    data-stock="<?= $producto->stock ?>"
+                                    data-id="<?= $producto->id_producto ?>"
+                                    data-price="<?= $precio_unitario ?>">
+                                    <button class="btn-quantity-minus" <?= ($cantidad <= 1 || $isDisabled) ? 'disabled' : '' ?>>
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <span class="quantity" data-original="<?= $cantidad ?>"><?= $cantidad ?></span>
+                                    <button class="btn-quantity-plus" <?= ($cantidad >= $producto->stock || $isDisabled) ? 'disabled' : '' ?>>
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna de subtotal -->
+                        <div class="col-md-2 col-sm-6">
+                            <div class="subtotal-section">
+                                <label class="subtotal-label">Subtotal</label>
+                                <div class="product-subtotal" data-base-price="<?= $precio_unitario ?>">
+                                    Gs. <?= number_format($precio_total, 0, ',', '.') ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna de acciones -->
+                        <div class="col-md-2">
+                            <div class="action-buttons">
+                                <button class="remove-from-cart-btn" data-id="<?= htmlspecialchars($producto->id_producto) ?>" title="Eliminar del carrito">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <button class="move-to-favorites-btn" data-id="<?= htmlspecialchars($producto->id_producto) ?>" title="Mover a favoritos">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
+                </div>
+            <?php endforeach; ?>
 
-                    <!-- Columna de acciones -->
-                    <div class="col-md-2 col-sm-6">
-                        <div class="action-buttons">
-                            <button class="remove-item-btn" data-id="<?= htmlspecialchars($producto->id_producto) ?>">
-                                <i class="fas fa-times"></i>
-                                Quitar
+            <!-- Resumen del carrito -->
+            <div class="cart-summary">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="summary-details">
+                            <div class="summary-row">
+                                <span>Subtotal (<?= count($productos) ?> productos):</span>
+                                <span id="cart-subtotal">Gs. <?= number_format($subtotal, 0, ',', '.') ?></span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Envío:</span>
+                                <span id="shipping-cost">Gs. 25.000</span>
+                            </div>
+                            <div class="summary-row discount-row" style="display: none;">
+                                <span>Descuento:</span>
+                                <span id="discount-amount" class="text-success">- Gs. 0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="total-section">
+                            <div class="total-label">Total a pagar:</div>
+                            <div class="total-amount" id="cart-total">Gs. <?= number_format($subtotal + 25000, 0, ',', '.') ?></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checkout-actions mt-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="index.php?c=productos" class="continue-shopping-btn">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Continuar comprando
+                            </a>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="checkout-btn" id="proceed-checkout">
+                                <i class="fas fa-credit-card me-2"></i>
+                                Comprar ahora
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
-        <?php endforeach; ?>
 
-        <div class="cart-summary">
-            <span class="subtotal-label">Total estimado:</span>
-            <span class="subtotal-value" id="total-value">Gs. <?= number_format(array_sum(array_column($productos, 'precio')), 0, ',', '.') ?></span>
-            <br>
-            <a href="#" class="checkout-btn" id="checkout-btn">
-                <i class="fas fa-credit-card me-2"></i>
-                Proceder al Pago
-            </a>
-        </div>
-    <?php else: ?>
-        <div class="empty-list">
-            <div class="empty-icon">
-                <i class="fas fa-shopping-cart"></i>
+        <?php else: ?>
+            <div class="empty-cart">
+                <div class="empty-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h4>Tu carrito está vacío</h4>
+                <p>Explora nuestro catálogo y encuentra los productos perfectos para ti</p>
+                <a href="index.php?c=productos" class="explore-products-btn">
+                    <i class="fas fa-search me-2"></i>
+                    Explorar productos
+                </a>
             </div>
-            <h4>Tu carrito está vacío</h4>
-            <p>Descubre productos increíbles y añádelos a tu carrito</p>
-            <a href="index.php?c=home" class="btn btn-primary mt-3">
-                <i class="fas fa-home me-2"></i>
-                Ir al Inicio
-            </a>
-        </div>
-    <?php endif; ?>
+        <?php endif; ?>
+    </div>
 </div>
 
 <script>
     $(document).ready(function() {
-        // Función para manejar la eliminación de un producto del carrito
-        $('.remove-item-btn').on('click', function() {
-            const $btn = $(this);
-            const productId = $btn.data('id');
-            const $itemElement = $btn.closest('.cart-product-card');
+                const SHIPPING_COST = 25000;
 
-            // Confirmación elegante con SweetAlert2
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: "Remover este producto de tu carrito",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, remover',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Deshabilitar botón durante la operación
-                    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Removiendo...');
+                // Manejador para aumentar cantidad
+                $('.btn-quantity-plus').on('click', function() {
+                    const $btn = $(this);
+                    const $quantityControl = $btn.closest('.quantity-control');
+                    const $quantitySpan = $quantityControl.find('.quantity');
+                    const productId = $quantityControl.data('id');
+                    let quantity = parseInt($quantitySpan.text());
+                    const stock = parseInt($quantityControl.data('stock'));
+
+                    if (quantity < stock) {
+                        quantity++;
+                        updateQuantityInServer(productId, quantity, $quantitySpan, $quantityControl);
+                    }
+                });
+
+                // Manejador para disminuir cantidad
+                $('.btn-quantity-minus').on('click', function() {
+                    const $btn = $(this);
+                    const $quantityControl = $btn.closest('.quantity-control');
+                    const $quantitySpan = $quantityControl.find('.quantity');
+                    const productId = $quantityControl.data('id');
+                    let quantity = parseInt($quantitySpan.text());
+
+                    if (quantity > 1) {
+                        quantity--;
+                        updateQuantityInServer(productId, quantity, $quantitySpan, $quantityControl);
+                    }
+                });
+
+                // Función para actualizar cantidad en el servidor
+                function updateQuantityInServer(productId, newQuantity, $quantitySpan, $quantityControl) {
+                    const originalQuantity = parseInt($quantitySpan.data('original'));
 
                     $.ajax({
-                        url: 'index.php?c=carrito&a=remove',
+                        url: 'index.php?c=carrito&a=actualizar',
+                        method: 'POST',
+                        data: {
+                            id_producto: productId,
+                            cantidad: newQuantity
+                        },
+                        success: function(response) {
+                            $quantitySpan.text(newQuantity).data('original', newQuantity);
+
+                            // Actualizar botones de cantidad
+                            const stock = parseInt($quantityControl.data('stock'));
+                            $quantityControl.find('.btn-quantity-minus').prop('disabled', newQuantity <= 1);
+                            $quantityControl.find('.btn-quantity-plus').prop('disabled', newQuantity >= stock);
+
+                            // Actualizar subtotal del producto
+                            updateProductSubtotal($quantityControl.closest('.cart-product-card'));
+
+                            // Actualizar totales
+                            updateCartTotals();
+
+                            showSuccessMessage('Cantidad actualizada correctamente');
+                        },
+                        error: function() {
+                            $quantitySpan.text(originalQuantity);
+                            showErrorMessage('Error al actualizar la cantidad. Intenta nuevamente.');
+                        }
+                    });
+                }
+
+                // Manejador para eliminar producto del carrito
+                $('.remove-from-cart-btn').on('click', function() {
+                    const $btn = $(this);
+                    const productId = $btn.data('id');
+                    const $productCard = $btn.closest('.cart-product-card');
+                    const productName = $productCard.find('h5').text();
+
+                    Swal.fire({
+                        title: '¿Eliminar producto?',
+                        text: `¿Deseas quitar "${productName}" del carrito?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#520017',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            removeFromCart(productId, $productCard);
+                        }
+                    });
+                });
+
+                // Función para eliminar del carrito
+                function removeFromCart(productId, $productCard) {
+                    $.ajax({
+                        url: 'index.php?c=carrito&a=eliminar',
                         method: 'POST',
                         data: {
                             id_producto: productId
                         },
-                        dataType: 'json',
                         success: function(response) {
-                            if (response.success) {
-                                $itemElement.addClass('removing');
-                                $itemElement.fadeOut(400, function() {
-                                    $(this).remove();
-                                    updateProductCount();
-                                    updateSubtotal();
-                                    checkEmptyList();
-                                    
-                                    // Actualizar contadores en el navbar
-                                    if (typeof updateFavoritesCounter === 'function') {
-                                        updateFavoritesCounter();
-                                    }
-                                });
-                                
-                                Swal.fire('¡Listo!', response.success, 'success');
-                            } else if (response.error) {
-                                Swal.fire('Error', response.error, 'error');
-                            }
-                        },
-                        error: function(xhr) {
-                            let errorMessage = 'Error al remover producto.';
-                            if (xhr.responseJSON && xhr.responseJSON.error) {
-                                errorMessage = xhr.responseJSON.error;
-                            }
-                            Swal.fire('Error', errorMessage, 'error');
-                        },
-                        complete: function() {
-                            $btn.prop('disabled', false).html('<i class="fas fa-times"></i> Quitar');
-                        }
-                    });
-                }
-            });
-        });
+                            $productCard.addClass('removing');
+                            $productCard.fadeOut(400, function() {
+                                $(this).remove();
+                                updateItemsCount();
+                                updateCartTotals();
+                                checkEmptyCart();
+                            });
 
-        // Función para limpiar todo el carrito
-        $('#clear-cart-list').on('click', function(e) {
-            e.preventDefault();
+                            // Actualizar contador global del carrito
+                            let currentCartCount = parseInt($('.cart-count').text()) || 0;
+                            const removedQuantity = parseInt($productCard.find('.quantity').text());
+                            updateGlobalCartCount(Math.max(0, currentCartCount - removedQuantity));
 
-            if ($('.cart-product-card').length === 0) {
-                return;
-            }
-
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: "Se eliminarán todos los productos de tu carrito",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, limpiar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const $btn = $('#clear-cart-list');
-                    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Limpiando...');
-
-                    $.ajax({
-                        url: 'index.php?c=carrito&a=clean',
-                        method: 'POST',
-                        dataType: 'json',
-                        success: function(response) {
-                            if (response.success) {
-                                $('.cart-product-card').fadeOut(400, function() {
-                                    $(this).remove();
-                                    updateProductCount();
-                                    updateSubtotal();
-                                    checkEmptyList();
-                                    
-                                    // Actualizar contadores en el navbar
-                                    if (typeof updateFavoritesCounter === 'function') {
-                                        updateFavoritesCounter();
-                                    }
-                                });
-
-                                Swal.fire('¡Listo!', response.success, 'success');
-                            } else if (response.error) {
-                                Swal.fire('Error', response.error, 'error');
-                            }
+                            showSuccessMessage('Producto eliminado del carrito');
                         },
                         error: function() {
-                            Swal.fire('Error', 'No se pudo limpiar el carrito. Intenta nuevamente.', 'error');
-                        },
-                        complete: function() {
-                            $btn.prop('disabled', false).html('<i class="fas fa-trash"></i> Limpiar carrito');
+                            showErrorMessage('Error al eliminar el producto. Intenta nuevamente.');
                         }
                     });
                 }
-            });
-        });
 
-        // Función para manejar el checkout
-        $('#checkout-btn').on('click', function(e) {
-            e.preventDefault();
-            
-            Swal.fire({
-                title: 'Proceder al Pago',
-                text: 'Esta funcionalidad estará disponible próximamente',
-                icon: 'info',
-                confirmButtonText: 'Entendido'
-            });
-        });
+                // Manejador para mover a favoritos
+                $('.move-to-favorites-btn').on('click', function() {
+                    const $btn = $(this);
+                    const productId = $btn.data('id');
+                    const $productCard = $btn.closest('.cart-product-card');
 
-        // Función para actualizar la cantidad de productos
-        function updateProductCount() {
-            const count = $('.cart-product-card').length;
-            $('#cart-count').text(count + ' productos');
-        }
+                    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
 
-        // Función para actualizar el subtotal
-        function updateSubtotal() {
-            let total = 0;
-            $('.cart-product-card').each(function() {
-                const price = parseFloat($(this).find('.product-price').text().replace(/[Gs.,]/g, ''));
-                const quantity = parseInt($(this).find('.quantity').text());
-                total += price * quantity;
-            });
-            
-            $('#total-value').text('Gs. ' + total.toLocaleString('es-PY'));
-        }
+                    $.ajax({
+                        url: 'index.php?c=favoritos&a=agregar',
+                        method: 'POST',
+                        data: {
+                            id_producto: productId
+                        },
+                        success: function(response) {
+                            // Eliminar del carrito después de añadir a favoritos
+                            removeFromCart(productId, $productCard);
+                            showSuccessMessage('Producto movido a favoritos');
+                        },
+                        error: function() {
+                            $btn.prop('disabled', false).html('<i class="fas fa-heart"></i>');
+                            showErrorMessage('Error al mover a favoritos. Intenta nuevamente.');
+                        }
+                    });
+                });
 
-        // Función para verificar si la lista está vacía
-        function checkEmptyList() {
-            if ($('.cart-product-card').length === 0) {
-                $('.cart-container').html(`
-                    <div class="cart-header">
-                        <h1 class="cart-title">
-                            <i class="fas fa-shopping-cart me-2"></i>
-                            Mi Carrito
-                        </h1>
-                        <span class="cart-count">0 productos</span>
-                    </div>
-                    <div class="empty-list">
-                        <div class="empty-icon">
-                            <i class="fas fa-shopping-cart"></i>
-                        </div>
-                        <h4>Tu carrito está vacío</h4>
-                        <p>Descubre productos increíbles y añádelos a tu carrito</p>
-                        <a href="index.php?c=home" class="btn btn-primary mt-3">
-                            <i class="fas fa-home me-2"></i>
-                            Ir al Inicio
-                        </a>
-                    </div>
-                `);
-            }
-        }
-    });
+                // Manejador para vaciar carrito
+                $('#clear-cart').on('click', function(e) {
+                    e.preventDefault();
+
+                    if ($('.cart-product-card').length === 0) {
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: '¿Vaciar carrito?',
+                        text: "Se eliminarán todos los productos del carrito",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#520017',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, vaciar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            clearCart();
+                        }
+                    });
+                });
+
+                // Función para vaciar carrito
+                function clearCart() {
+                    $.ajax({
+                        url: 'index.php?c=carrito&a=vaciar',
+                        method: 'POST',
+                        success: function(response) {
+                            $('.cart-product-card').fadeOut(400, function() {
+                                $(this).remove();
+                                updateItemsCount();
+                                updateCartTotals();
+                                checkEmptyCart();
+                            });
+
+                            updateGlobalCartCount(0);
+                            showSuccessMessage('Carrito vaciado correctamente');
+                        },
+                        error: function() {
+                            showErrorMessage('Error al vaciar el carrito. Intenta nuevamente.');
+                        }
+                    });
+                }
+
+                // --- LÓGICA DE FINALIZAR COMPRA ---
+                $('#proceed-checkout').on('click', function() {
+                    const $btn = $(this);
+
+                    if ($('.cart-product-card').length === 0) {
+                        showErrorMessage('Tu carrito está vacío');
+                        return;
+                    }
+
+                    // Recopila los datos de los productos del carrito
+                    let productosVenta = [];
+                    let totalVenta = 0;
+                    $('.cart-product-card').each(function() {
+                        const productId = $(this).data('id');
+                        const quantity = parseInt($(this).find('.quantity').text());
+                        const unitPrice = parseInt($(this).find('.product-subtotal').data('base-price'));
+
+                        productosVenta.push({
+                            id_producto: productId,
+                            cantidad: quantity,
+                            precio_unitario: unitPrice
+                        });
+
+                        totalVenta += unitPrice * quantity;
+                    });
+
+                    const totalConEnvio = totalVenta + SHIPPING_COST;
+
+                    // Deshabilita el botón mientras se procesa la venta
+                    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Procesando...');
+
+                    // Envía los datos de la venta al servidor
+                    $.ajax({
+                        url: 'index.php?c=venta&a=guardar',
+                        method: 'POST',
+                        data: {
+                            productos: productosVenta,
+                            total: totalConEnvio,
+                            metodo_pago: 'Pendiente', // O el método de pago que elijas
+                            estado_pago: 'Pendiente'
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: '¡Compra exitosa! 🎉',
+                                    text: '¿Deseas generar una factura o un ticket?',
+                                    icon: 'success',
+                                    showCancelButton: true,
+                                    showDenyButton: true,
+                                    confirmButtonColor: '#28a745',
+                                    denyButtonColor: '#17a2b8',
+                                    cancelButtonColor: '#6c757d',
+                                    confirmButtonText: 'Generar Factura',
+                                    denyButtonText: 'Generar Ticket',
+                                    cancelButtonText: 'Solo finalizar'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        // Lógica para generar factura
+                                        // Redirige o llama a tu controlador de facturas
+                                        window.location.href = response.redirect_url + '&a=factura';
+                                    } else if (result.isDenied) {
+                                        // Lógica para generar ticket
+                                        // Redirige o llama a tu controlador de tickets
+                                        window.location.href = response.redirect_url + '&a=ticket';
+                                    } else {
+                                        // Solo redirige a la página de confirmación sin generar documento
+                                        window.location.href = response.redirect_url;
+                                    }
+                                });
+                            } else {
+                                Swal.fire('Error', response.error || 'No se pudo completar la compra.', 'error');
+                            }
+                        },
+                    });
+
+                    // Funciones auxiliares
+                    function updateProductSubtotal($productCard) {
+                        const quantity = parseInt($productCard.find('.quantity').text());
+                        const basePrice = parseInt($productCard.find('.product-subtotal').data('base-price'));
+                        const newSubtotal = basePrice * quantity;
+
+                        $productCard.find('.product-subtotal').text(`Gs. ${newSubtotal.toLocaleString('es-PY')}`);
+                    }
+
+                    function updateCartTotals() {
+                        let subtotal = 0;
+
+                        $('.cart-product-card').each(function() {
+                            const quantity = parseInt($(this).find('.quantity').text());
+                            const basePrice = parseInt($(this).find('.product-subtotal').data('base-price'));
+                            subtotal += basePrice * quantity;
+                        });
+
+                        const total = subtotal + SHIPPING_COST;
+
+                        $('#cart-subtotal').text(`Gs. ${subtotal.toLocaleString('es-PY')}`);
+                        $('#cart-total').text(`Gs. ${total.toLocaleString('es-PY')}`);
+                    }
+
+                    function updateItemsCount() {
+                        const count = $('.cart-product-card').length;
+                        $('#items-count').text(`(${count} productos seleccionados)`);
+                    }
+
+                    function checkEmptyCart() {
+                        if ($('.cart-product-card').length === 0) {
+                            showEmptyCartState();
+                        }
+                    }
+
+                    function showEmptyCartState() {
+                        $('#cart-products-container').html(`
+            <div class="empty-cart">
+                <div class="empty-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h4>Tu carrito está vacío</h4>
+                <p>Explora nuestro catálogo y encuentra los productos perfectos para ti</p>
+                <a href="index.php?c=productos" class="explore-products-btn">
+                    <i class="fas fa-search me-2"></i>
+                    Explorar productos
+                </a>
+            </div>
+        `);
+                    }
+
+                    function updateGlobalCartCount(count) {
+                        $('.cart-count').text(count);
+                    }
+
+                    function showSuccessMessage(message) {
+                        const $alert = $(`
+            <div class="alert alert-success alert-dismissible fade show position-fixed" 
+                 style="top: 20px; right: 20px; z-index: 1050; min-width: 300px;">
+                <i class="fas fa-check-circle me-2"></i>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `);
+                        $('body').append($alert);
+                        setTimeout(() => {
+                            $alert.fadeOut(() => $alert.remove());
+                        }, 4000);
+                    }
+
+                    function showErrorMessage(message) {
+                        const $alert = $(`
+            <div class="alert alert-danger alert-dismissible fade show position-fixed" 
+                 style="top: 20px; right: 20px; z-index: 1050; min-width: 300px;">
+                <i class="fas fa-exclamation-circle me-2"></i>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `);
+                        $('body').append($alert);
+                        setTimeout(() => {
+                            $alert.fadeOut(() => $alert.remove());
+                        }, 4000);
+                    }
+
+                    // Inicialización
+                    updateCartTotals();
+                });
 </script>

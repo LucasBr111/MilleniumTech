@@ -106,4 +106,18 @@ class carrito
             throw $e;
         }
     }
+    public function listarProductoscarrito($id_cliente)
+{
+        try {
+            $sql = "SELECT p.*, c.cantidad FROM productos p
+                    LEFT JOIN carrito c ON p.id_producto = c.id_producto
+                    WHERE c.id_cliente = ?";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(array($id_cliente));
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            error_log("Error en listar productos del carrito: " . $e->getMessage());
+            return [];
+        }
+    }
 }

@@ -12,7 +12,7 @@ html, body {
 
 body {
     /* Fondo elegante con textura de mármol sutil */
-    background-color: var(--blanco-marmol2);
+    background-color: beige;
     
     overflow-x: hidden;
     margin: 0;

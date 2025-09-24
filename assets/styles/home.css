@@ -1,13 +1,5 @@
 
 
-    :root {
-        --blanco-marmol: #F8F9FA;
-        --dorado-elegante: #D4AF37;
-        --bordo-profundo: #520017;
-        --verde-jade: #006B54;
-        --negro-futurista: #121212;
-    }
-
     /* Estilos de Tipografía para Secciones */
     .section-title {
         font-family: 'Cinzel', serif;

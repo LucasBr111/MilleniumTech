@@ -2,29 +2,21 @@
 class venta
 {
     private $pdo;
-    
 
-    public $id;
-    public $id_venta;              // si lo usás como correlativo interno
+    // Atributos públicos de la tabla ventas
+    public $id_venta;
+    public $id_producto;
     public $id_cliente;
-    public $id_vendedor;
-    public $id_vehiculo;
-
-    public $precio_costo;
-    public $precio_venta_subtotal;
+    public $cantidad;
+    public $precio_unitario;
+    public $subtotal;        // generado automáticamente por la BD
+    public $descuento;
+    public $impuesto;
     public $total;
-
-    public $tipo_comprobante;
-    public $numero_comprobante;
-
-    public $margen_ganancia;
-
+    public $metodo_pago;
+    public $estado_pago;
     public $fecha_venta;
-    public $metodo_pago;           // en tu idea de registro usaste tipo_pago
-    public $anulado;
-
-    public $id_presupuesto;
-
+    public $observaciones;
 
     public function __construct()
     {
@@ -48,11 +40,11 @@ class venta
     }
 
     // Obtener una venta por ID
-    public function obtener($id)
+    public function obtener($id_venta)
     {
         try {
-            $stm = $this->pdo->prepare("SELECT * FROM ventas WHERE id = ?");
-            $stm->execute([$id]);
+            $stm = $this->pdo->prepare("SELECT * FROM ventas WHERE id_venta = ?");
+            $stm->execute([$id_venta]);
             return $stm->fetch(PDO::FETCH_OBJ);
         } catch (Exception $e) {
             die($e->getMessage());
@@ -64,31 +56,25 @@ class venta
     {
         try {
             $sql = "INSERT INTO ventas (
-                        id_presupuesto, id_cliente, id_vendedor, id_vehiculo,
-                        fecha_venta, metodo_pago, total, precio_costo,
-                        precio_venta_subtotal, cantidad_vendida, 
-                        margen_ganancia, tipo_comprobante, numero_comprobante,
-                        anulado
-                    ) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
+                        id_producto, id_cliente, cantidad, precio_unitario,
+                        descuento, impuesto, total, metodo_pago,
+                        estado_pago, observaciones
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             $this->pdo->prepare($sql)->execute([
-                $data->id_presupuesto,
+                $data->id_producto,
                 $data->id_cliente,
-                $data->id_vendedor,
-                $data->id_vehiculo,
-                $data->fecha_venta,
-                $data->tipo_pago,              // en tu idea de registro usas tipo_pago
-                $data->precio_total,           // total de la venta
-                $data->precio_costo ?? 0,
-                $data->precio_venta_subtotal ?? 0,
-                $data->cantidad_vendida ?? 1,
-                $data->margen_ganancia ?? 0,
-                $data->tipo_comprobante ?? 'Factura',
-                $data->numero_comprobante ?? null
+                $data->cantidad,
+                $data->precio_unitario,
+                $data->descuento ?? 0,
+                $data->impuesto ?? 0,
+                $data->total, // subtotal se calcula solo en BD
+                $data->metodo_pago,
+                $data->estado_pago ?? 'pendiente',
+                $data->observaciones ?? null
             ]);
 
-            return $this->pdo->lastInsertId(); // devuelve el id_venta generado
+            return $this->pdo->lastInsertId();
         } catch (Exception $e) {
             die($e->getMessage());
         }
@@ -99,48 +85,65 @@ class venta
     {
         try {
             $sql = "UPDATE ventas SET
-                        id_presupuesto = ?,
+                        id_producto = ?,
                         id_cliente = ?,
-                        id_vendedor = ?,
-                        id_vehiculo = ?,
-                        fecha_venta = ?,
-                        metodo_pago = ?,
+                        cantidad = ?,
+                        precio_unitario = ?,
+                        descuento = ?,
+                        impuesto = ?,
                         total = ?,
-                        precio_costo = ?,
-                        precio_venta_subtotal = ?,
-                        cantidad_vendida = ?,
-                        margen_ganancia = ?,
-                        tipo_comprobante = ?,
-                        numero_comprobante = ?
-                    WHERE id = ?";
+                        metodo_pago = ?,
+                        estado_pago = ?,
+                        observaciones = ?
+                    WHERE id_venta = ?";
 
             $this->pdo->prepare($sql)->execute([
-                $data->id_presupuesto,
+                $data->id_producto,
                 $data->id_cliente,
-                $data->id_vendedor,
-                $data->id_vehiculo,
-                $data->fecha_venta,
-                $data->tipo_pago,
-                $data->precio_total,
-                $data->precio_costo ?? 0,
-                $data->precio_venta_subtotal ?? 0,
-                $data->cantidad_vendida ?? 1,
-                $data->margen_ganancia ?? 0,
-                $data->tipo_comprobante,
-                $data->numero_comprobante,
-                $data->id
+                $data->cantidad,
+                $data->precio_unitario,
+                $data->descuento ?? 0,
+                $data->impuesto ?? 0,
+                $data->total,
+                $data->metodo_pago,
+                $data->estado_pago,
+                $data->observaciones,
+                $data->id_venta
             ]);
         } catch (Exception $e) {
             die($e->getMessage());
         }
     }
 
-    // Anular una venta (cambia flag anulado = 1)
-    public function anular($id)
+    // Cambiar estado de pago (ej: marcar como pagado o cancelado)
+    public function cambiarEstado($id_venta, $estado)
     {
         try {
-            $sql = "UPDATE ventas SET anulado = 1 WHERE id = ?";
-            $this->pdo->prepare($sql)->execute([$id]);
+            $sql = "UPDATE ventas SET estado_pago = ? WHERE id_venta = ?";
+            $this->pdo->prepare($sql)->execute([$estado, $id_venta]);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    // Eliminar una venta (si lo necesitás)
+    public function eliminar($id_venta)
+    {
+        try {
+            $sql = "DELETE FROM ventas WHERE id_venta = ?";
+            $this->pdo->prepare($sql)->execute([$id_venta]);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function ultimoId()
+    {
+        try {
+            $stm = $this->pdo->prepare("SELECT MAX(id_venta) as max_id FROM ventas");
+            $stm->execute();
+            $result = $stm->fetch(PDO::FETCH_OBJ);
+            return $result->max_id ?? 0;
         } catch (Exception $e) {
             die($e->getMessage());
         }

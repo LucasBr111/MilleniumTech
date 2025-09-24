@@ -23,15 +23,28 @@ class carritoController
 
     public function index()
     {
-        // $id_cliente = $_SESSION['user_id'];
-        // $productos = $this->carrito->listarProductoscarrito($id_cliente);
-        // require_once 'view/header.php';
-        // require_once './view/productos/productos-carrito.php';
+        if (isset($_SESSION['user_id'])) {
+            $id_cliente = $_SESSION['user_id'];
+            $productos = $this->carrito->listarProductoscarrito($id_cliente);
+            require_once 'view/header.php';
+            require_once './view/productos/productos-carrito.php';
+            require_once 'view/footer.php';
+        }
+        else{
+            // describir el error
+            $problema = "Acceso no autorizado";
+            $subtitulo_error = "Inicia sesión o regístrate para continuar.";
+            $cuerpo_problema = "Si ya tienes una cuenta, por favor inicia sesión. Si no, puedes registrarte para crear una nueva cuenta y disfrutar de nuestros servicios.";
+            require_once 'view/header.php';
+            require_once './view/errror.php';
+            require_once 'view/footer.php';
+        }
+
     }
 
     public function agregar() {
         if (!isset($_SESSION['user_id'])) {
-            http_response_code(401); // Código de 'Unauthorized'
+            http_response_code(401); 
             echo json_encode(['error' => 'Debes iniciar sesión para añadir a carrito.']);
             exit;
         }
