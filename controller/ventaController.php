@@ -44,56 +44,53 @@ class ventaController
         }
     }
 
-    // En tu controlador de ventas (VentaController.php)
 
-// En tu controlador de ventas (VentaController.php)
+    public function guardar()
+    {
+        try {
+            // Validación básica
+            if (!isset($_POST['productos']) || !is_array($_POST['productos'])) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'error' => 'No hay productos para registrar.']);
+                return;
+            }
 
-public function guardar() {
-    try {
-        // Validación básica
-        if (!isset($_POST['productos']) || !is_array($_POST['productos'])) {
+            // 1. Obtener el último id_venta y generar el nuevo
+            // Asumiendo que tienes un método en tu modelo para esto
+            $ultimo_id = $this->model->ultimoId();
+            $nuevo_id_venta = $ultimo_id + 1;
+
+
+            // 2. Iterar sobre los productos y registrarlos en la tabla 'ventas'
+            foreach ($_POST['productos'] as $producto) {
+                $venta = new venta();
+                $venta->id_venta        = $nuevo_id_venta;
+                $venta->id_producto     = $producto['id_producto'];
+                $venta->id_cliente      = $_SESSION['id_cliente'] ?? 1; // ID de cliente de la sesión
+                $venta->cantidad        = $producto['cantidad'];
+                $venta->precio_unitario = $producto['precio_unitario'];
+                $venta->descuento       = 0;
+                $venta->impuesto        = 0;
+                $venta->total           = $venta->cantidad * $venta->precio_unitario;
+                $venta->metodo_pago     = $_POST['metodo_pago'] ?? 'Pendiente';
+                $venta->estado_pago     = $_POST['estado_pago'] ?? 'Pendiente';
+                $venta->observaciones   = null;
+
+                $this->model->registrar($venta);
+            }
+
+
+            // VAciar el carrito despues de la compra
+            $this->carrito->limpiar($_SESSION['id_cliente']);
+
+            // 4. Devolver una respuesta JSON exitosa
             header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'error' => 'No hay productos para registrar.']);
-            return;
+            echo json_encode(['success' => true, 'redirect_url' => 'index.php?c=documentos&id_venta=' . $nuevo_id_venta]);
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
-
-        // 1. Obtener el último id_venta y generar el nuevo
-        // Asumiendo que tienes un método en tu modelo para esto
-        $ultimo_id = $this->model->ultimoId();
-        $nuevo_id_venta = $ultimo_id + 1;
-        
-
-        // 2. Iterar sobre los productos y registrarlos en la tabla 'ventas'
-        foreach ($_POST['productos'] as $producto) {
-            $venta = new venta();
-            $venta->id_venta        = $nuevo_id_venta;
-            $venta->id_producto     = $producto['id_producto'];
-            $venta->id_cliente      = $_SESSION['id_cliente'] ?? 1; // ID de cliente de la sesión
-            $venta->cantidad        = $producto['cantidad'];
-            $venta->precio_unitario = $producto['precio_unitario'];
-            $venta->descuento       = 0;
-            $venta->impuesto        = 0;
-            $venta->total           = $venta->cantidad * $venta->precio_unitario;
-            $venta->metodo_pago     = $_POST['metodo_pago'] ?? 'Pendiente';
-            $venta->estado_pago     = $_POST['estado_pago'] ?? 'Pendiente';
-            $venta->observaciones   = null;
-
-            $this->model->registrar($venta);
-        }
-
-
-        // VAciar el carrito despues de la compra
-        $this->carrito->limpiar($_SESSION['id_cliente']);
-
-        // 4. Devolver una respuesta JSON exitosa
-        header('Content-Type: application/json');
-        echo json_encode(['success' => true, 'redirect_url' => 'index.php?c=documentos&id_venta=' . $nuevo_id_venta]);
-
-    } catch (Exception $e) {
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
-}
     // Cambiar estado de pago (ej: AJAX)
     public function cambiarEstado()
     {

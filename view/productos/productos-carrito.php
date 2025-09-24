@@ -7,7 +7,7 @@
                 <span class="cart-count-display" id="items-count">(<?= count($productos ?? []) ?> productos seleccionados)</span>
             </div>
             <div class="col-md-4 text-end">
-                <a href="#" id="clear-cart" class="cart-clear-btn">
+                <a  id="clear-cart" class="cart-clear-btn">
                     <i class="fas fa-trash-alt me-1"></i>
                     Vaciar carrito
                 </a>
@@ -106,9 +106,6 @@
                             <div class="action-buttons">
                                 <button class="remove-from-cart-btn" data-id="<?= htmlspecialchars($producto->id_producto) ?>" title="Eliminar del carrito">
                                     <i class="fas fa-trash"></i>
-                                </button>
-                                <button class="move-to-favorites-btn" data-id="<?= htmlspecialchars($producto->id_producto) ?>" title="Mover a favoritos">
-                                    <i class="fas fa-heart"></i>
                                 </button>
                             </div>
                         </div>
@@ -289,39 +286,12 @@
                             const removedQuantity = parseInt($productCard.find('.quantity').text());
                             updateGlobalCartCount(Math.max(0, currentCartCount - removedQuantity));
 
+
                             showSuccessMessage('Producto eliminado del carrito');
                         },
-                        error: function() {
-                            showErrorMessage('Error al eliminar el producto. Intenta nuevamente.');
-                        }
                     });
                 }
 
-                // Manejador para mover a favoritos
-                $('.move-to-favorites-btn').on('click', function() {
-                    const $btn = $(this);
-                    const productId = $btn.data('id');
-                    const $productCard = $btn.closest('.cart-product-card');
-
-                    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
-
-                    $.ajax({
-                        url: 'index.php?c=favoritos&a=agregar',
-                        method: 'POST',
-                        data: {
-                            id_producto: productId
-                        },
-                        success: function(response) {
-                            // Eliminar del carrito después de añadir a favoritos
-                            removeFromCart(productId, $productCard);
-                            showSuccessMessage('Producto movido a favoritos');
-                        },
-                        error: function() {
-                            $btn.prop('disabled', false).html('<i class="fas fa-heart"></i>');
-                            showErrorMessage('Error al mover a favoritos. Intenta nuevamente.');
-                        }
-                    });
-                });
 
                 // Manejador para vaciar carrito
                 $('#clear-cart').on('click', function(e) {
@@ -531,4 +501,6 @@
                     // Inicialización
                     updateCartTotals();
                 });
+    });
+                
 </script>

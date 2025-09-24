@@ -68,7 +68,7 @@ class carritoController
         }
     }
 
-    public function remove() {
+    public function eliminar() {
         header('Content-Type: application/json');
         
         try {
@@ -101,7 +101,7 @@ class carritoController
         }
     }
 
-    public function clean() {
+    public function vaciar() {
         header('Content-Type: application/json');
         
         try {
@@ -115,7 +115,7 @@ class carritoController
         }
     }
 
-    public function updateQuantity() {
+    public function actualizar() {
         header('Content-Type: application/json');
         
         try {
