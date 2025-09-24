@@ -101,5 +101,45 @@ class carritoController
             echo json_encode(['error' => 'Error al limpiar carrito: ' . $e->getMessage()]);
         }
     }
+
+    public function updateQuantity() {
+        header('Content-Type: application/json');
+        
+        try {
+            // Verificar que el usuario esté logueado
+            if (!isset($_SESSION['user_id'])) {
+                http_response_code(401);
+                echo json_encode(['error' => 'Debes iniciar sesión para actualizar el carrito.']);
+                return;
+            }
+            
+            // Verificar que los datos estén presentes
+            if (!isset($_REQUEST['id_producto']) || !isset($_REQUEST['cantidad'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Datos incompletos.']);
+                return;
+            }
+            
+            $id_cliente = $_SESSION['user_id'];
+            $id_producto = $_REQUEST['id_producto'];
+            $cantidad = intval($_REQUEST['cantidad']);
+            
+            // Validar cantidad
+            if ($cantidad < 0) {
+                http_response_code(400);
+                echo json_encode(['error' => 'La cantidad no puede ser negativa.']);
+                return;
+            }
+            
+            // Actualizar cantidad
+            $this->carrito->actualizarCantidad($id_cliente, $id_producto, $cantidad);
+            
+            echo json_encode(['success' => 'Cantidad actualizada correctamente.']);
+            
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al actualizar cantidad: ' . $e->getMessage()]);
+        }
+    }
     
 }

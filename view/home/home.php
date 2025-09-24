@@ -44,11 +44,13 @@
                                     <?= number_format($producto->precio, 0, ',', '.') ?>
                                 </p>
                                 <div class="product-actions d-flex justify-content-between align-items-center mt-3">
-                                    <button class="btn btn-add-cart" data-id="<?= $producto->id_producto ?>">Añadir al carrito</button>
-
-                                    <button class="btn btn-fav" data-id="<?= $producto->id_producto ?>">
-                                        <i class="<?= ($producto->es_favorito !== null) ? 'fas text-danger' : 'far' ?> fa-heart"></i>
+                                    <button class="btn btn-add-cart" data-id="<?= $producto->id_producto ?>" <?= ($producto->stock <= 0) ? 'disabled' : '' ?>>
+                                        <?= ($producto->stock <= 0) ? 'Sin stock' : 'Añadir al carrito' ?>
                                     </button>
+
+                             <button class="btn btn-fav" data-id="<?= $producto->id_producto ?>">
+                                 <i class="<?= (isset($producto->es_favorito) && $producto->es_favorito) ? 'fas text-danger' : 'far' ?> fa-heart"></i>
+                             </button>
                                 </div>
                             </div>
                         </div>
@@ -259,6 +261,81 @@
             },
             complete: function() {
                 button.prop('disabled', false);
+            }
+        });
+    });
+
+    // Manejar el botón de agregar al carrito
+    $('.btn-add-cart').on('click', function() {
+        const button = $(this);
+        const id = button.data('id');
+        const isLoggedIn = <?= isset($_SESSION['isLoggedIn']) && $_SESSION['isLoggedIn'] ? 'true' : 'false' ?>;
+
+        if (!isLoggedIn) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Debes iniciar sesión',
+                text: 'Para agregar productos al carrito necesitas iniciar sesión.',
+                confirmButtonText: 'Ir al login'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "index.php?c=login";
+                }
+            });
+            return;
+        }
+
+        if (button.prop('disabled')) {
+            return;
+        }
+
+        button.prop('disabled', true);
+        const originalText = button.text();
+        button.text('Agregando...');
+
+        $.ajax({
+            url: 'index.php?c=carrito&a=agregar',
+            method: 'POST',
+            data: { 
+                id_producto: id,
+                cantidad: 1
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: response.success,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                    // Actualizar contadores en el navbar
+                    if (typeof updateFavoritesCounter === 'function') {
+                        updateFavoritesCounter();
+                    }
+                } else if (response.error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.error
+                    });
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'Error al agregar al carrito.';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMessage
+                });
+            },
+            complete: function() {
+                button.prop('disabled', false).text(originalText);
             }
         });
     });
