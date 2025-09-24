@@ -96,7 +96,7 @@ class clienteController {
         header('Content-Type: application/json');
     
         try {
-            $id_cliente = (int) $_GET['id_cliente'];
+            $id_cliente = (int) $_REQUEST['id_cliente'];
 
             // Consultar al modelo
             $cartCount = $this->carrito->contarPorCliente($id_cliente) ?? 0;

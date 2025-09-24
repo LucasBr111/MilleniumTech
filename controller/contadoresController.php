@@ -1,8 +1,10 @@
 <?php
 require_once 'model/favoritos.php';
+require_once 'model/carrito.php';
 
 class contadoresController {
     private $favoritos;
+    private $carrito;
 
     public function __construct() {
         // Iniciar sesión si no está iniciada
@@ -11,6 +13,7 @@ class contadoresController {
         }
         
         $this->favoritos = new favoritos();
+        $this->carrito = new carrito();
     }
 
     public function obtenerContadores() {
@@ -27,8 +30,8 @@ class contadoresController {
             if (isset($_SESSION['user_id']) && $_SESSION['user_id']) {
                 $contadores['favoritos'] = $this->favoritos->contarPorCliente($_SESSION['user_id']);
                 
-                // TODO: Implementar contador de carrito cuando tengas el modelo
-                // $contadores['carrito'] = $this->carrito->contarPorCliente($_SESSION['user_id']);
+                
+                $contadores['carrito'] = $this->carrito->contarPorCliente($_SESSION['user_id']);
             }
             
             echo json_encode([

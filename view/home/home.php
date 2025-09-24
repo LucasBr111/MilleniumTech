@@ -27,118 +27,118 @@
             </div>
         </div>
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mt-3">
-    <?php if (!empty($productos_destacados)): ?>
-        <?php foreach ($productos_destacados as $producto): ?>
-            <div class="col">
-                <div class="product-card">
-                    <div class="product-image-container">
-                        <img src="assets/uploads/productos/<?php echo $producto->imagen ?>" class="img-fluid" alt="<?= $producto->nombre_producto ?>">
-                        <span class="stock-badge <?= ($producto->stock > 0) ? 'bg-success' : 'bg-danger' ?>">
-                            <?= ($producto->stock > 0) ? 'En Stock' : 'Sin Stock' ?>
-                        </span>
-                    </div>
-                    <div class="product-info">
-                        <h5 class="product-title"><?= htmlspecialchars($producto->nombre_producto) ?></h5>
-                        <p class="product-price">
-                            <span class="currency-symbol">Gs.</span>
-                            <?= number_format($producto->precio, 0, ',', '.') ?>
-                        </p>
-                        <div class="product-actions d-flex justify-content-between align-items-center mt-3">
-                            <button class="btn btn-add-cart" data-id="<?= $producto->id_producto ?>">Añadir al carrito</button>
-                            
-                            <button class="btn btn-fav" data-id="<?= $producto->id_producto ?>">
-                                <i class="<?= ($producto->es_favorito !== null) ? 'fas text-danger' : 'far' ?> fa-heart"></i>
-                            </button>
+            <?php if (!empty($productos_destacados)): ?>
+                <?php foreach ($productos_destacados as $producto): ?>
+                    <div class="col">
+                        <div class="product-card">
+                            <div class="product-image-container">
+                                <img src="assets/uploads/productos/<?php echo $producto->imagen ?>" class="img-fluid" alt="<?= $producto->nombre_producto ?>">
+                                <span class="stock-badge <?= ($producto->stock > 0) ? 'bg-success' : 'bg-danger' ?>">
+                                    <?= ($producto->stock > 0) ? 'En Stock' : 'Sin Stock' ?>
+                                </span>
+                            </div>
+                            <div class="product-info">
+                                <h5 class="product-title"><?= htmlspecialchars($producto->nombre_producto) ?></h5>
+                                <p class="product-price">
+                                    <span class="currency-symbol">Gs.</span>
+                                    <?= number_format($producto->precio, 0, ',', '.') ?>
+                                </p>
+                                <div class="product-actions d-flex justify-content-between align-items-center mt-3">
+                                    <button class="btn btn-add-cart" data-id="<?= $producto->id_producto ?>">Añadir al carrito</button>
+
+                                    <button class="btn btn-fav" data-id="<?= $producto->id_producto ?>">
+                                        <i class="<?= ($producto->es_favorito !== null) ? 'fas text-danger' : 'far' ?> fa-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-12 text-center">
+                    <p class="text-muted">No hay productos destacados disponibles en este momento.</p>
                 </div>
-            </div>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <div class="col-12 text-center">
-            <p class="text-muted">No hay productos destacados disponibles en este momento.</p>
+            <?php endif; ?>
         </div>
-    <?php endif; ?>
-</div>
     </section>
 
 
     <section id="category-banners" class="py-5">
-    <div class="row">
-        <div class="col-12 text-center mb-4">
-            <h2 class="section-title">Categorías Populares</h2>
-            <p class="section-subtitle">Encuentra la tecnología que buscas.</p>
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <h2 class="section-title">Categorías Populares</h2>
+                <p class="section-subtitle">Encuentra la tecnología que buscas.</p>
+            </div>
         </div>
-    </div>
 
-    <div id="categoryCarouselContainer" class="position-relative">
-        <div class="row g-3" id="carouselItems">
-            <?php foreach ($categorias as $r): ?>
-                <div class="col-md-4 category-item d-none">
-                    <a href="index.php?c=productos&a=listarcategoria&id=<?= $r->id_categoria ?>" class="d-block text-decoration-none">
-                        <div class="category-banner-card">
-                            <img src="assets/uploads/categorias/<?= $r->imagen ?>" alt="<?= $r->nombre_categoria ?>" class="img-fluid">
-                            <div class="category-overlay">
-                                <h4 class="category-title"><?= $r->nombre_categoria ?></h4>
+        <div id="categoryCarouselContainer" class="position-relative">
+            <div class="row g-3" id="carouselItems">
+                <?php foreach ($categorias as $r): ?>
+                    <div class="col-md-4 category-item d-none">
+                        <a href="index.php?c=productos&a=listarcategoria&id=<?= $r->id_categoria ?>" class="d-block text-decoration-none">
+                            <div class="category-banner-card">
+                                <img src="assets/uploads/categorias/<?= $r->imagen ?>" alt="<?= $r->nombre_categoria ?>" class="img-fluid">
+                                <div class="category-overlay">
+                                    <h4 class="category-title"><?= $r->nombre_categoria ?></h4>
+                                </div>
                             </div>
-                        </div>
-                    </a>
-                </div>
-            <?php endforeach; ?>
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <button class="carousel-control-prev" id="prevBtn" type="button">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" id="nextBtn" type="button">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguiente</span>
+            </button>
         </div>
-
-        <button class="carousel-control-prev" id="prevBtn" type="button">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Anterior</span>
-        </button>
-        <button class="carousel-control-next" id="nextBtn" type="button">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Siguiente</span>
-        </button>
-    </div>
-</section>
+    </section>
 
 
 
-<section id="new-arrivals" class="py-5">
-    <div class="row">
-        <div class="col-12 text-center mb-4">
-            <h2 class="section-title">Novedades</h2>
-            <p class="section-subtitle">Lo último en tecnología y lanzamientos exclusivos.</p>
+    <section id="new-arrivals" class="py-5">
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <h2 class="section-title">Novedades</h2>
+                <p class="section-subtitle">Lo último en tecnología y lanzamientos exclusivos.</p>
+            </div>
         </div>
-    </div>
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mt-3">
-        <?php if (!empty($productos_novedades)): ?>
-            <?php foreach ($productos_novedades as $producto): ?>
-                <div class="col">
-                    <div class="product-card">
-                        <div class="product-image-container">
-                            <img src="<?= $producto->imagen ?>" class="img-fluid" alt="<?= $producto->nombre_producto ?>">
-                            <span class="stock-badge <?= ($producto->stock > 0) ? 'bg-success' : 'bg-danger' ?>">
-                                <?= ($producto->stock > 0) ? 'En Stock' : 'Sin Stock' ?>
-                            </span>
-                        </div>
-                        <div class="product-info">
-                            <h5 class="product-title"><?= htmlspecialchars($producto->nombre_producto) ?></h5>
-                            <p class="product-price">
-                                <span class="currency-symbol">Gs.</span>
-                                <?= number_format($producto->precio, 0, ',', '.') ?>
-                            </p>
-                            <div class="product-actions d-flex justify-content-between align-items-center mt-3">
-                                <button class="btn btn-add-cart" data-id="<?= $producto->id_producto ?>">Añadir al carrito</button>
-                                <button class="btn btn-fav" data-id="<?= $producto->id_producto ?>"><i class="fas fa-heart"></i></button>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mt-3">
+            <?php if (!empty($productos_novedades)): ?>
+                <?php foreach ($productos_novedades as $producto): ?>
+                    <div class="col">
+                        <div class="product-card">
+                            <div class="product-image-container">
+                                <img src="<?= $producto->imagen ?>" class="img-fluid" alt="<?= $producto->nombre_producto ?>">
+                                <span class="stock-badge <?= ($producto->stock > 0) ? 'bg-success' : 'bg-danger' ?>">
+                                    <?= ($producto->stock > 0) ? 'En Stock' : 'Sin Stock' ?>
+                                </span>
+                            </div>
+                            <div class="product-info">
+                                <h5 class="product-title"><?= htmlspecialchars($producto->nombre_producto) ?></h5>
+                                <p class="product-price">
+                                    <span class="currency-symbol">Gs.</span>
+                                    <?= number_format($producto->precio, 0, ',', '.') ?>
+                                </p>
+                                <div class="product-actions d-flex justify-content-between align-items-center mt-3">
+                                    <button class="btn btn-add-cart" data-id="<?= $producto->id_producto ?>">Añadir al carrito</button>
+                                    <button class="btn btn-fav" data-id="<?= $producto->id_producto ?>"><i class="fas fa-heart"></i></button>
+                                </div>
                             </div>
                         </div>
                     </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-12 text-center">
+                    <p class="text-muted">No hay productos nuevos disponibles en este momento.</p>
                 </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <div class="col-12 text-center">
-                <p class="text-muted">No hay productos nuevos disponibles en este momento.</p>
-            </div>
-        <?php endif; ?>
-    </div>
-</section>
+            <?php endif; ?>
+        </div>
+    </section>
 </div>
 
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
@@ -206,71 +206,60 @@
         updateCarousel();
     });
     $(document).on('click', '.btn-fav', function() {
-    var button = $(this);
-    var id = button.data('id');
-    var isLoggedIn = <?= isset($_SESSION['isLoggedIn']) && $_SESSION['isLoggedIn'] ? 'true' : 'false' ?>;
+        var button = $(this);
+        var id = button.data('id');
+        var isLoggedIn = <?= isset($_SESSION['isLoggedIn']) && $_SESSION['isLoggedIn'] ? 'true' : 'false' ?>;
 
-    if (!isLoggedIn) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Debes iniciar sesión',
-            text: 'Para añadir productos a favoritos necesitas iniciar sesión.',
-            confirmButtonText: 'Ir al login'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = "index.php?c=login";
+        if (!isLoggedIn) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Debes iniciar sesión',
+                text: 'Para añadir productos a favoritos necesitas iniciar sesión.',
+                confirmButtonText: 'Ir al login'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "index.php?c=login";
+                }
+            });
+            return;
+        }
+
+        button.prop('disabled', true);
+
+        // Determinar si la acción es "agregar" o "eliminar"
+        var action = button.find('i').hasClass('text-danger') ? 'remove' : 'add';
+        var url = 'index.php?c=favoritos&a=' + action;
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: {
+                id_producto: id
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    if (action === 'add') {
+                        button.find('i').removeClass('far').addClass('fas text-danger');
+                        console.log(response.success);
+                    } else {
+                        // Si se eliminó, cambia el icono a vacío y gris
+                        button.find('i').removeClass('fas text-danger').addClass('far');
+                    }
+
+                    updateCounters();
+                    
+                } else if (response.error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.error
+                    });
+                }
+            },
+            complete: function() {
+                button.prop('disabled', false);
             }
         });
-        return;
-    }
-
-    button.prop('disabled', true);
-    
-    // Determinar si la acción es "agregar" o "eliminar"
-    var action = button.find('i').hasClass('text-danger') ? 'remove' : 'add';
-    var url = 'index.php?c=favoritos&a=' + action;
-    
-    $.ajax({
-        url: url,
-        method: 'POST',
-        data: { id_producto: id },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                 if (action === 'add') {
-                     button.find('i').removeClass('far').addClass('fas text-danger');
-                     console.log(response.success);
-                 } else {
-                     // Si se eliminó, cambia el icono a vacío y gris
-                     button.find('i').removeClass('fas text-danger').addClass('far');
-                 }
-                 
-                 // Actualizar contadores en el navbar
-                 if (typeof updateFavoritesCounter === 'function') {
-                     updateFavoritesCounter();
-                 }
-            } else if (response.error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: response.error
-                });
-            }
-        },
-        error: function(xhr) {
-            var errorMessage = 'Error en la petición.';
-            if (xhr.responseJSON && xhr.responseJSON.error) {
-                errorMessage = xhr.responseJSON.error;
-            }
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: errorMessage
-            });
-        },
-        complete: function() {
-            button.prop('disabled', false);
-        }
     });
-});
 </script>

@@ -31,12 +31,40 @@ class carrito
     public function contarPorCliente($id_cliente){
         try {
             $sql = "SELECT COUNT(*) as total FROM carrito WHERE id_cliente = ?";
-            $this->pdo->prepare($sql)->execute(array($id_cliente));
-            $result = $this->pdo->prepare($sql)->fetch(PDO::FETCH_OBJ);
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(array($id_cliente));
+            $result = $stmt->fetch(PDO::FETCH_OBJ);
             return $result->total;
         } catch (Exception $e) {
             error_log("Error en contar carrito: " . $e->getMessage());
             return 0;
+        }
+    }
+    public function eliminar($id_cliente, $id_producto)
+    {
+        try {
+            $sql = "DELETE FROM carrito WHERE id_cliente = ? AND id_producto = ?";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(array($id_cliente, $id_producto));
+            
+            // Verificar si se eliminó algún registro
+            if ($stmt->rowCount() === 0) {
+                throw new Exception("El producto no estaba en tus carrito");
+            }
+            
+            return true;
+        } catch (Exception $e) {
+            error_log("Error en eliminar favorito: " . $e->getMessage());
+            throw $e;
+        }
+    }
+    public function limpiar($id_cliente){
+        try{
+            $sql = "DELETE FROM carrito WHERE id_cliente = ?";
+            $this->pdo->prepare($sql)
+                 ->execute(array($id_cliente));
+        } catch (Exception $e) {
+            die($e->getMessage());
         }
     }
 }

@@ -52,7 +52,7 @@
         color: var(--blanco-marmol);
     }
 
-    .fav-count {
+    .fav-countt {
         font-size: 1rem;
         opacity: 0.9;
         font-weight: 300;
@@ -381,7 +381,7 @@
         <div class="row align-items-center">
             <div class="col-md-8">
                 <h3 class="fav-title">Mi Lista de Deseos</h3>
-                <span class="fav-count" id="products-count">(<?= count($productos ?? []) ?> productos guardados)</span>
+                <span class="fav-countt" id="products-count">(<?= count($productos ?? []) ?> productos guardados)</span>
             </div>
             <div class="col-md-4 text-end">
                 <a href="#" id="clear-fav-list" class="fav-clear-btn">
@@ -588,59 +588,6 @@
         });
 
 
-        // Manejo mejorado de cantidad con validación de stock
-        $('.btn-quantity-plus').on('click', function() {
-            const $btn = $(this);
-            const $parent = $btn.closest('.quantity-control');
-            const $quantityElem = $parent.find('.quantity');
-            const stock = parseInt($parent.data('stock'));
-            const currentQuantity = parseInt($quantityElem.text());
-            const productId = $parent.data('id');
-
-            if (stock <= 0) {
-                showStockMessage('Este producto no tiene stock disponible');
-                return;
-            }
-
-            if (currentQuantity < stock) {
-                const newQuantity = currentQuantity + 1;
-                $quantityElem.text(newQuantity);
-
-                // Deshabilitar botón si alcanzamos el límite
-                if (newQuantity >= stock) {
-                    $btn.prop('disabled', true);
-                    showStockMessage(`Stock máximo alcanzado (${stock} unidades)`);
-                }
-
-                // Habilitar botón de menos
-                $parent.find('.btn-quantity-minus').prop('disabled', false);
-
-                updateSubtotal();
-            }
-        });
-
-        $('.btn-quantity-minus').on('click', function() {
-            const $btn = $(this);
-            const $parent = $btn.closest('.quantity-control');
-            const $quantityElem = $parent.find('.quantity');
-            const currentQuantity = parseInt($quantityElem.text());
-
-            if (currentQuantity > 1) {
-                const newQuantity = currentQuantity - 1;
-                $quantityElem.text(newQuantity);
-
-                // Habilitar botón de más
-                $parent.find('.btn-quantity-plus').prop('disabled', false);
-
-                // Deshabilitar botón de menos si llegamos al mínimo
-                if (newQuantity <= 1) {
-                    $btn.prop('disabled', true);
-                }
-
-                updateSubtotal();
-                hideStockMessage();
-            }
-        });
 
         // Función mejorada para añadir al carrito
         $('.add-to-cart-btn').on('click', function() {
@@ -663,7 +610,6 @@
                     cantidad: quantity
                 },
                 success: function(response) {
-                    // Animación de éxito
                     $btn.removeClass('btn-primary').addClass('btn-success')
                         .html('<i class="fas fa-check"></i> ¡Añadido!');
 
@@ -678,7 +624,7 @@
                     }, 2000);
 
                     // Actualizar contador del carrito si existe
-                    updateCartCounter();
+                    updateCounters();
                 },
                 error: function() {
                     $btn.prop('disabled', false).html('<i class="fas fa-cart-plus me-1"></i> Al carrito');
@@ -728,24 +674,6 @@
         `);
         }
 
-        function showStockMessage(message) {
-            // Crear o actualizar mensaje de stock
-            let $message = $('.stock-message');
-            if ($message.length === 0) {
-                $message = $('<div class="alert alert-warning stock-message mt-2" style="font-size: 0.85rem;"></div>');
-                $('.fav-container').prepend($message);
-            }
-            $message.html(`<i class="fas fa-exclamation-triangle me-1"></i> ${message}`).slideDown();
-
-            // Auto-ocultar después de 5 segundos
-            setTimeout(hideStockMessage, 5000);
-        }
-
-        function hideStockMessage() {
-            $('.stock-message').slideUp(function() {
-                $(this).remove();
-            });
-        }
 
         function showSuccessMessage(message) {
             const $alert = $(`
@@ -775,11 +703,6 @@
             setTimeout(() => {
                 $alert.fadeOut(() => $alert.remove());
             }, 4000);
-        }
-
-        function updateCartCounter() {
-            // Aquí puedes añadir lógica para actualizar el contador del carrito
-            // si tienes uno en tu navbar o header
         }
 
         // Inicializar estado de botones según stock
