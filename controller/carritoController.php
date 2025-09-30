@@ -57,6 +57,7 @@ class carritoController
     
             try {
                 $this->carrito->guardar($carrito);
+                header('Content-Type: application/json');
                 echo json_encode(['success' => 'Producto añadido a carrito.']);
             } catch (Exception $e) {
                 http_response_code(500); 

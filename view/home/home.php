@@ -166,7 +166,7 @@
                 <?php $count = 0; ?>
                 <?php foreach ($categorias as $categoria): ?>
                     <?php if ($count < 6): ?>
-                        <div class="category-card category-item" data-category-id="<?= $categoria->id_categoria ?>" onclick="location.href='index.php?c=productos&categoria=<?= $categoria->id_categoria ?>'">
+                        <div class="category-card category-item" data-category-id="<?= $categoria->id_categoria ?>" onclick="location.href='index.php?c=productos&id_categoria=<?= $categoria->id_categoria ?>'">
                             <img src="assets/uploads/categorias/<?= $categoria->imagen ?>" alt="<?= htmlspecialchars($categoria->nombre_categoria) ?>" class="category-image">
                             <div class="category-content">
                                 <h4 class="category-title"><?= htmlspecialchars($categoria->nombre_categoria) ?></h4>
@@ -232,6 +232,12 @@
                             <h5 class="product-title"><?= htmlspecialchars($producto->nombre_producto) ?></h5>
                             <p class="product-price">Gs. <?= number_format($producto->precio, 0, ',', '.') ?></p>
                             <div class="product-actions">
+                                                                <!-- Boton de editar si sos admin -->
+                                                                <?php if ($_SESSION['nivel'] === '1'): ?>
+                                    <button class="btn btn-warning btn-edit-product" data-bs-toggle="modal" data-bs-target="#crudModal" data-c="productos" data-id="<?= $producto->id_producto ?>">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                <?php endif; ?>
                                 <button class="btn btn-primary-custom btn-add-cart" data-id="<?= $producto->id_producto ?>" <?= ($producto->stock <= 0) ? 'disabled' : '' ?>>
                                     <i class="fas fa-shopping-cart me-2"></i>Añadir al Carrito
                                 </button>
@@ -360,6 +366,7 @@
         </div>
     </div>
 </footer> -->
+<?php include ('view/crudModal.php') ?>
 
 
 <script>
@@ -516,86 +523,6 @@
         });
     });
 
-    // Manejar el botón de agregar al carrito
-    $('.btn-add-cart').on('click', function() {
-        const button = $(this);
-        const id = button.data('id');
-        const isLoggedIn = <?= isset($_SESSION['isLoggedIn']) && $_SESSION['isLoggedIn'] ? 'true' : 'false' ?>;
-
-        if (!isLoggedIn) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Debes iniciar sesión',
-                text: 'Para agregar productos al carrito necesitas iniciar sesión.',
-                confirmButtonText: 'Ir al login'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "index.php?c=login";
-                }
-            });
-            return;
-        }
-
-        if (button.prop('disabled')) {
-            return;
-        }
-
-        button.prop('disabled', true);
-        const originalText = button.text();
-        button.html('<i class="fas fa-spinner fa-spin me-2"></i>Agregando...');
-
-        $.ajax({
-            url: 'index.php?c=carrito&a=agregar',
-            method: 'POST',
-            data: {
-                id_producto: id,
-                cantidad: 1
-            },
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Éxito!',
-                        text: response.success,
-                        timer: 2000,
-                        showConfirmButton: false,
-                        toast: true,
-                        position: 'top-end'
-                    });
-
-                    // Actualizar contadores en el navbar
-                    if (typeof updateFavoritesCounter === 'function') {
-                        updateFavoritesCounter();
-                    }
-                    if (typeof updateCartCounter === 'function') {
-                        updateCartCounter();
-                    }
-                } else if (response.error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.error
-                    });
-                }
-            },
-            error: function(xhr) {
-                let errorMessage = 'Error al agregar al carrito.';
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                    errorMessage = xhr.responseJSON.error;
-                }
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: errorMessage
-                });
-            },
-            complete: function() {
-                button.prop('disabled', false);
-                button.html('<i class="fas fa-shopping-cart me-2"></i>Añadir al Carrito');
-            }
-        });
-    });
 
     // Smooth scrolling para los enlaces del hero
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -715,16 +642,6 @@
                 preloader.style.display = 'none';
             }, 300);
         }
-    });
-
-    // Error handling para imágenes rotas
-    document.addEventListener('DOMContentLoaded', function() {
-        const images = document.querySelectorAll('img');
-        images.forEach(img => {
-            img.addEventListener('error', function() {
-                this.src = 'https://via.placeholder.com/300x200/111111/FFD700?text=Imagen+No+Disponible';
-            });
-        });
     });
 
     // Función para mostrar tooltips en botones deshabilitados

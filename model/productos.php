@@ -212,4 +212,44 @@ class Productos
             die($e->getMessage());
         }
     }
+    public function ListarPorCategoria($id_categoria, $filtro = null, $terminoBusqueda = null) {
+       
+        $sql = "SELECT p.*, c.nombre_categoria
+                FROM productos AS p
+                LEFT JOIN categorias AS c ON p.id_categoria = c.id_categoria
+                WHERE p.id_categoria = :id_categoria AND p.stock > 0";
+                
+        $params = [':id_categoria' => $id_categoria];
+    
+        // Añadir cláusula de búsqueda si existe
+        if ($terminoBusqueda) {
+            $sql .= " AND p.nombre_producto LIKE :termino";
+            $params[':termino'] = '%' . $terminoBusqueda . '%';
+        }
+    
+        // Añadir cláusula de ordenamiento
+        switch ($filtro) {
+            case 'precio_asc':
+                $sql .= " ORDER BY p.precio ASC";
+                break;
+            case 'precio_desc':
+                $sql .= " ORDER BY p.precio DESC";
+                break;
+            case 'nombre_asc':
+                $sql .= " ORDER BY p.nombre_producto ASC";
+                break;
+            case 'nombre_desc':
+                $sql .= " ORDER BY p.nombre_producto DESC";
+                break;
+            default:
+                $sql .= " ORDER BY p.id_producto DESC"; // Orden por defecto
+                break;
+        }
+    
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+    
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
 }

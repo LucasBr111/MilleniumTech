@@ -1,22 +1,3 @@
-:root {
-    --primary-gold: #FFD700;
-    --secondary-gold: #FFA500;
-    --accent-gold: #FFED4A;
-    --dark-bg: #0A0A0A;
-    --darker-bg: #050505;
-    --card-bg: #111111;
-    --card-hover: #1A1A1A;
-    --border-glow: #FFD700;
-    --text-primary: #FFFFFF;
-    --text-secondary: #CCCCCC;
-    --text-muted: #888888;
-    --accent-blue:rgb(0, 4, 255);
-    --success-green: #00FF88;
-    --danger-red: #FF4757;
-    --gradient-primary: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    --gradient-secondary: linear-gradient(135deg, #00D4FF 0%, var(--accent-blue)100%);
-}
-
 * {
     margin: 0;
     padding: 0;

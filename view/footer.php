@@ -69,4 +69,85 @@
        }
      });
    })();
+   
+    // Manejar el botón de agregar al carrito
+    $('.btn-add-cart').on('click', function() {
+        const button = $(this);
+        const id = button.data('id');
+        const isLoggedIn = <?= isset($_SESSION['isLoggedIn']) && $_SESSION['isLoggedIn'] ? 'true' : 'false' ?>;
+
+        if (!isLoggedIn) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Debes iniciar sesión',
+                text: 'Para agregar productos al carrito necesitas iniciar sesión.',
+                confirmButtonText: 'Ir al login'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "index.php?c=login";
+                }
+            });
+            return;
+        }
+
+        if (button.prop('disabled')) {
+            return;
+        }
+
+        button.prop('disabled', true);
+        const originalText = button.text();
+        button.html('<i class="fas fa-spinner fa-spin me-2"></i>Agregando...');
+
+        $.ajax({
+            url: 'index.php?c=carrito&a=agregar',
+            method: 'POST',
+            data: {
+                id_producto: id,
+                cantidad: 1
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: response.success,
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+
+                    // Actualizar contadores en el navbar
+                    if (typeof updateFavoritesCounter === 'function') {
+                        updateFavoritesCounter();
+                    }
+                    if (typeof updateCartCounter === 'function') {
+                        updateCartCounter();
+                    }
+                } else if (response.error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.error
+                    });
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'Error al agregar al carrito.';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMessage
+                });
+            },
+            complete: function() {
+                button.prop('disabled', false);
+                button.html('<i class="fas fa-shopping-cart me-2"></i>Añadir al Carrito');
+            }
+        });
+    });
  </script>

@@ -3,39 +3,43 @@
 require_once 'model/clientes.php';
 require_once 'model/carrito.php';
 require_once 'model/favoritos.php';
+require_once 'model/venta.php';
 
 class clienteController {
     private $model;
     private $carrito;
     private $favoritos;
+    private $venta;
 
     public function __construct() {
         $this->model = new clientes();
         $this->carrito = new carrito();
         $this->favoritos = new favoritos();
+        $this->venta = new venta();
     }
 
     public function index() {
-        // session_start();
-        // if (!isset($_SESSION['isLoggedIn']) || $_SESSION['isLoggedIn'] !== true) {
-        //     header('Location: index.php?c=login');
-        //     exit;
-        // }
+        session_start();
+        if (!isset($_SESSION['isLoggedIn']) || $_SESSION['isLoggedIn'] !== true) {
+            header('Location: index.php?c=login');
+            exit;
+        }
 
-        // $clientes = $this->model->Listar();
-        // require_once 'view/header.php';
-        // require_once 'view/clientes/clientes.php';
-        // require_once 'view/footer.php';
+        $cliente = $this->model->obtenerUsuario($_SESSION['user_id']);
+        $compras = $this->venta->obtenerVentaCliente($_SESSION['user_id']);
+        require_once 'view/header.php';
+        require_once 'view/clientes/clientes.php';
+        require_once 'view/footer.php';
     }
 
     public function crud(){
         $id = $_REQUEST['id'];
         if (isset($id)) {
-            $cliente = $this->model->obtener($id);
+            $cliente = $this->model->obtenerUsuario($id);
         } else {
             $cliente = new clientes();
         }
-        require_once 'view/clientes/clientes-form.php';
+        require_once 'view/clientes/clientes-editar.php';
     }
 
     public function signUp(){
@@ -110,6 +114,19 @@ class clienteController {
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
         }
+    }
+    public function guardar(){
+        $cliente = new clientes();
+
+        $cliente->id = $_REQUEST['id'];
+        $cliente->nombre = $_REQUEST['nombre'];
+        $cliente->email = $_REQUEST['email'];
+        $cliente->ci = $_REQUEST['ci'];
+        $cliente->telefono = $_REQUEST['telefono'];
+        $cliente->password = $_REQUEST['password'];
+
+        $this->model->actualizar($cliente);
+        header('Location: index.php?c=cliente');
     }
     
 

@@ -50,35 +50,67 @@ class venta
             die($e->getMessage());
         }
     }
+// Registrar una nueva venta (y puntos)
+public function registrar($data)
+{
+    // Asegúrate de que $this->pdo sea una instancia de PDO
+    try {
+        // 1. INICIAR TRANSACCIÓN: Asegura atomicidad (ambas o ninguna)
+        $this->pdo->beginTransaction(); 
 
-    // Registrar una nueva venta
-    public function registrar($data)
-    {
-        try {
-            $sql = "INSERT INTO ventas (
-                        id_producto, id_cliente, cantidad, precio_unitario,
-                        descuento, impuesto, total, metodo_pago,
-                        estado_pago, observaciones
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        // --- SENTENCIA 1: REGISTRAR VENTA ---
+        $sqlVenta = "INSERT INTO ventas (
+                         id_producto, id_cliente, id_venta,
+                         cantidad, precio_unitario,
+                         descuento, impuesto, total, metodo_pago,
+                         estado_pago, observaciones
+                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        $stmtVenta = $this->pdo->prepare($sqlVenta);
+        $stmtVenta->execute([
+            $data->id_producto,
+            $data->id_cliente,
+            $data->id_venta,
+            $data->cantidad,
+            $data->precio_unitario,
+            $data->descuento ?? 0,
+            $data->impuesto ?? 0,
+            $data->total, 
+            $data->metodo_pago,
+            $data->estado_pago ?? 'pendiente',
+            $data->observaciones ?? null
+        ]);
 
-            $this->pdo->prepare($sql)->execute([
-                $data->id_producto,
-                $data->id_cliente,
-                $data->cantidad,
-                $data->precio_unitario,
-                $data->descuento ?? 0,
-                $data->impuesto ?? 0,
-                $data->total, // subtotal se calcula solo en BD
-                $data->metodo_pago,
-                $data->estado_pago ?? 'pendiente',
-                $data->observaciones ?? null
-            ]);
+        $idVentaRegistrada = $this->pdo->lastInsertId();
 
-            return $this->pdo->lastInsertId();
-        } catch (Exception $e) {
-            die($e->getMessage());
+        // --- SENTENCIA 2: REGISTRAR PUNTOS ---
+        $sqlPuntos = "INSERT INTO puntos (id_cliente, puntos, fecha_obtencion, descripcion)
+                      VALUES (?, 10, NOW(), 'Compra realizada')";
+        
+        $stmtPuntos = $this->pdo->prepare($sqlPuntos);
+        // Solo necesita el id_cliente
+        $stmtPuntos->execute([$data->id_cliente]);
+
+        // 2. CONFIRMAR TRANSACCIÓN: Si todo salió bien
+        $this->pdo->commit();
+
+        return $idVentaRegistrada;
+
+    } catch (Exception $e) {
+        // 3. REVERTIR TRANSACCIÓN: Si algo falla
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
         }
+        
+        // Es mejor lanzar la excepción para que el controlador superior la maneje (ej. en el try/catch de guardar())
+        // En tu caso, si quieres mantener la estructura, úsala para devolver un error:
+        throw new Exception("Error al registrar la venta y/o puntos: " . $e->getMessage());
+        
+        // Si no lanzas la excepción, necesitarás que la función superior
+        // (el controlador 'guardar') capture el die() o el mensaje de error.
+        // die($e->getMessage());
     }
+}
 
     // Actualizar una venta
     public function actualizar($data)
@@ -137,15 +169,43 @@ class venta
         }
     }
 
+
     public function ultimoId()
     {
         try {
-            $stm = $this->pdo->prepare("SELECT MAX(id_venta) as max_id FROM ventas");
-            $stm->execute();
+            $stm = $this->pdo->query("SELECT COALESCE(MAX(id_venta), 0) as max_id FROM ventas");
             $result = $stm->fetch(PDO::FETCH_OBJ);
-            return $result->max_id ?? 0;
+            return (int)$result->max_id;
         } catch (Exception $e) {
             die($e->getMessage());
         }
     }
+
+    public function obtenerVentaCliente($id_cliente)
+    {
+        try {
+            $sql = "SELECT 
+                v.id_venta AS id_venta,
+                v.id,
+                v.total,                      
+                v.estado_pago AS estado,       
+                v.fecha_venta AS fecha,       
+                v.observaciones AS direccion_envio 
+                FROM ventas v                /* Aquí faltaba el FROM */
+                WHERE 
+                v.id_cliente = ?
+                GROUP BY 
+                v.id_venta
+                ORDER BY 
+                v.fecha_venta DESC";
+    
+            $stm = $this->pdo->prepare($sql);
+            $stm->execute([$id_cliente]);
+            return $stm->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+
 }

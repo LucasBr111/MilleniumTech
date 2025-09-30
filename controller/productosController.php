@@ -3,12 +3,15 @@
 require_once "model/productos.php";
 require_once "model/categorias.php";
 require_once "model/favoritos.php";
+require_once "model/venta.php";
 class productosController
 {
 
     private $model;
     private $categoria;
     private $favoritos;
+    private $venta;
+
     public function __construct()
     {
         // Iniciar sesión si no está iniciada
@@ -19,25 +22,39 @@ class productosController
         $this->model = new Productos();
         $this->categoria = new categorias();
         $this->favoritos = new favoritos();
+        $this->venta = new venta();
     }
 
     public function index()
     {
-        $ID_CLIENTE = $_SESSION['user_id'];
-        $productos = $this->model->Listar($ID_CLIENTE);
-        $categorias = $this->categoria->listar();
+        $id_categoria = $_REQUEST['id_categoria'];
+        $nombre_categoria = $this->categoria->Obtener($id_categoria)->nombre_categoria;
+        $filtro = $_REQUEST['filtro'] ?? null;
+        $productos = $this->model->ListarPorCategoria($id_categoria, $filtro);
+
         require_once 'view/header.php';
-        require_once 'view/sidebar.php';
-        require_once 'view/productos/productos.php';
+        require_once 'view/productos/productos-por-categoria.php';
         require_once 'view/footer.php';
     }
+
+    public function listar(){
+        $id_categoria = $_REQUEST['id_categoria'];
+        $filtro = $_REQUEST['filtro'];
+        $terminoBusqueda = $_REQUEST['query'] ;
+
+        $productos = $this->model->ListarPorCategoria($id_categoria, $filtro, $terminoBusqueda);
+
+        include './view/productos/listado-productos.php';
+       
+    }
+
 
     public function crud()
     {
         $producto = new Productos();
 
-        if (isset($_REQUEST['id_producto'])) {
-            $producto = $this->model->Obtener($_REQUEST['id_producto']);
+        if (isset($_REQUEST['id'])) {
+            $producto = $this->model->Obtener($_REQUEST['id']);
         }
 
         $categorias = $this->categoria->listar();
@@ -126,8 +143,9 @@ class productosController
                 }
             }
             // redirigir al index
-            header('Location: index.php?c=home');
-        }           
+           
+        }  
+        header('Location: index.php?c=home');         
     }
 
     public function addfavorito() {

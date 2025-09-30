@@ -9,16 +9,12 @@
 
 <div id="crudModal" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-xl">
-        <div class="modal-content">
+        <div class="modal-content modal-custom">
             <div class="modal-body" id="edit_form"> 
                 </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            </div>
         </div>
     </div>
 </div>
-
 
 <style>
 .modal-dialog {
