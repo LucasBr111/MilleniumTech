@@ -132,4 +132,29 @@
             die($e->getMessage());
         }
     }
+
+    // obtener puntos del cliente 
+    public function obtenerPuntos($id_cliente)
+    {
+        try {
+            $sql = "SELECT sum(puntos) as total FROM puntos WHERE id_cliente = ?";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$id_cliente]);
+            $result = $stmt->fetch(PDO::FETCH_OBJ);
+            return $result ? (int)$result->total : 0;
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+    public function listarpuntos($id_cliente)
+    {
+        try {
+            $sql = "SELECT * FROM puntos WHERE id_cliente = ? ORDER BY fecha_obtencion DESC";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$id_cliente]);
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
 }

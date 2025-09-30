@@ -22,7 +22,7 @@
             foreach ($productos as $item):
                 $producto = $item->producto ?? $item; // Flexibilidad en la estructura de datos
                 $cantidad = $item->cantidad ?? 1;
-                $precio_unitario = $producto->precio;
+                $precio_unitario = $producto->precio_final ?? $producto->precio; // Usa precio_final si está disponible
                 $precio_total = $precio_unitario * $cantidad;
                 $subtotal += $precio_total;
 

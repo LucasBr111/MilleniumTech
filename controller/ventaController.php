@@ -122,4 +122,33 @@ class ventaController
             die($e->getMessage());
         }
     }
+
+  // En tu VentaController.php o ClienteController.php
+
+public function obtenerDetallesVenta() {
+    try {
+        $id_venta = $_GET['id'] ?? 0;
+
+        // if ($id_venta != 2) {
+        //     throw new Exception("ID de venta inválido");
+        // }
+        
+        // Llamar al método del modelo
+        $detalles = $this->model->obtenerDetallesVenta($id_venta);
+        
+        // Asegurarse de devolver JSON válido
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($detalles);
+        exit;
+        
+    } catch (Exception $e) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'error' => true,
+            'message' => $e->getMessage()
+        ]);
+        exit;
+    }
+}
+
 }

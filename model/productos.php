@@ -14,6 +14,7 @@ class Productos
     public $promo_desde;
     public $promo_hasta;
     public $fecha_creacion;
+    public $precio_promo;
 
 
     public function __construct()
@@ -43,8 +44,9 @@ class Productos
                         promo_hasta,
                         id_categoria,
                         imagen,
-                        fecha_creacion
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        fecha_creacion, 
+                        precio_promo
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             $this->pdo->prepare($sql)
                 ->execute(
@@ -59,7 +61,8 @@ class Productos
                         $data->promo_hasta,
                         $data->id_categoria,
                         $data->imagen,
-                        $data->fecha_creacion
+                        $data->fecha_creacion,
+                        $data->precio_promo
                     )
                 );
 
@@ -85,7 +88,8 @@ class Productos
                         promo_desde = ?, 
                         promo_hasta = ?, 
                         id_categoria = ?, 
-                        imagen = ?
+                        imagen = ?,
+                        precio_promo = ?
                     WHERE id_producto = ?";
 
             $this->pdo->prepare($sql)
@@ -101,7 +105,9 @@ class Productos
                         $data->promo_hasta,
                         $data->id_categoria,
                         $data->imagen,
+                        $data->precio_promo,
                         $data->id_producto
+                    
                     )
                 );
         } catch (Exception $e) {
@@ -199,7 +205,7 @@ class Productos
 
             return $stm->fetchAll(PDO::FETCH_OBJ);
         } catch (Exception $e) {
-            die($e->getMessage()); 
+            die($e->getMessage());
         }
     }
     public function RegistrarImagenGaleria($id_producto, $ruta_imagen)
@@ -212,21 +218,22 @@ class Productos
             die($e->getMessage());
         }
     }
-    public function ListarPorCategoria($id_categoria, $filtro = null, $terminoBusqueda = null) {
-       
+    public function ListarPorCategoria($id_categoria, $filtro = null, $terminoBusqueda = null)
+    {
+
         $sql = "SELECT p.*, c.nombre_categoria
                 FROM productos AS p
                 LEFT JOIN categorias AS c ON p.id_categoria = c.id_categoria
                 WHERE p.id_categoria = :id_categoria AND p.stock > 0";
-                
+
         $params = [':id_categoria' => $id_categoria];
-    
+
         // Añadir cláusula de búsqueda si existe
         if ($terminoBusqueda) {
             $sql .= " AND p.nombre_producto LIKE :termino";
             $params[':termino'] = '%' . $terminoBusqueda . '%';
         }
-    
+
         // Añadir cláusula de ordenamiento
         switch ($filtro) {
             case 'precio_asc':
@@ -245,11 +252,56 @@ class Productos
                 $sql .= " ORDER BY p.id_producto DESC"; // Orden por defecto
                 break;
         }
-    
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
-    
+
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
+    public function listarOfertas($filtro = null, $terminoBusqueda = null)
+    {
+        $params = [];
+        $sql = "SELECT 
+                p.*, 
+                p.precio as precio_normal,
+                CASE
+                    WHEN p.promo_desde <= CURDATE() AND p.promo_hasta >= CURDATE()
+                    THEN p.precio_promo
+                    ELSE p.precio
+                END AS precio,
+                CASE
+                    WHEN p.promo_desde <= CURDATE() AND p.promo_hasta >= CURDATE()
+                    THEN TRUE
+                    ELSE FALSE
+                END AS en_promocion
+            FROM productos AS p
+            WHERE p.stock > 0";
+        $sql .= " AND p.promo_desde <= CURDATE() AND p.promo_hasta >= CURDATE()";
+
+        $sql .= " AND p.promo_desde IS NOT NULL AND p.promo_hasta IS NOT NULL";
+
+        if ($terminoBusqueda) {
+            $sql .= " AND p.nombre_producto LIKE :termino";
+            $params[':termino'] = '%' . $terminoBusqueda . '%';
+        }
+
+        switch ($filtro) {
+            case 'precio_asc':
+
+                $sql .= " ORDER BY precio ASC";
+                break;
+            case 'precio_desc':
+
+                $sql .= " ORDER BY precio DESC";
+                break;
+
+            default:
+                $sql .= " ORDER BY p.id_producto DESC"; // Orden por defecto
+                break;
+        }
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
 }

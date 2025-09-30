@@ -107,11 +107,24 @@ class carrito
         }
     }
     public function listarProductoscarrito($id_cliente)
-{
+    {
         try {
-            $sql = "SELECT p.*, c.cantidad FROM productos p
+            $sql = "SELECT 
+                        p.*, 
+                        c.cantidad,
+                        CASE
+                            WHEN p.promo_desde IS NOT NULL 
+                                 AND p.promo_hasta IS NOT NULL
+                                 AND NOW() >= p.promo_desde 
+                                 AND NOW() <= p.promo_hasta
+                            THEN p.precio_promo -- Aplicar el precio de promoción
+                            -- Si no hay promoción activa, usar el precio normal
+                            ELSE p.precio 
+                        END AS precio_final 
+                    FROM productos p
                     LEFT JOIN carrito c ON p.id_producto = c.id_producto
                     WHERE c.id_cliente = ?";
+            
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute(array($id_cliente));
             return $stmt->fetchAll(PDO::FETCH_OBJ);

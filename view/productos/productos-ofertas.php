@@ -1,8 +1,8 @@
 <div class="product-container container my-5">
     <div class="row mb-4 align-items-center title-section">
         <div class="col-md-6 mb-3 mb-md-0">
-            <h1 class="text-white"><?php echo ($nombre_categoria) ?></h1>
-            <p class="text-muted">Explora la selección de productos disponibles en esta categoría.</p>
+            <h1 class="text-white">Mejores Ofertas Exclusivas 🔥</h1>
+            <p class="text-muted">Descubre productos tecnológicos con precios imbatibles y disponibilidad limitada.</p>
         </div>
         
         <div class="col-md-6">
@@ -30,51 +30,57 @@
 
     <hr class="divider">
 
-   <?php include 'view/productos/listado-productos.php'; ?>
+    <div id="product-list" class="row"> 
+        <?php include 'view/productos/listado-productos.php'; ?>
+    </div>
+    
 </div>
 
 <script>
+// Asegúrate de que jQuery y las variables PHP estén cargadas antes de este script.
 $(document).ready(function() {
     
     // Función para realizar la búsqueda por AJAX
     function searchProducts(query) {
-    // Obtenemos el ID de la categoría y el filtro actual del contexto PHP
-    const categoriaId = <?= htmlspecialchars($id_categoria) ?>;
-    // Se corrige: se obtiene el filtro de la URL actual si no se pasa, o se usa el valor predeterminado si es la primera carga.
-    // Aunque en este caso, es mejor obtenerlo del contexto PHP como ya lo haces.
-    const filtro = '<?= htmlspecialchars($filtro) ?>'; 
+        // Obtenemos el ID de la categoría y el filtro actual del contexto PHP
+        // Asegúrate de que estas variables PHP ($id_categoria, $filtro) están definidas en el contexto que carga este código.
+        const categoriaId = <?= htmlspecialchars($id_categoria ?? 0) ?>; // Se añade operador null-coalescing para seguridad
+        const filtro = '<?= htmlspecialchars($filtro ?? '') ?>'; // Se añade operador null-coalescing para seguridad 
 
-    $.ajax({
-        // La URL debe apuntar al controlador y acción correctos.
-        // Los parámetros se enviarán en la propiedad 'data'.
-        url: 'index.php?c=productos&a=listar', // URL base del controlador/acción
-        method: 'GET',
-        data: {
-            // Se envían los datos como un objeto para que jQuery los formatee correctamente en la URL
-            query: query,
-            id_categoria: categoriaId,
-            filtro: filtro
-        },
-        success: function(response) {
-            // Actualizar el div de la lista de productos con la respuesta
-            $('#product-list').html(response);
-        },
-        error: function(xhr, status, error) {
-            // Manejo de errores más detallado
-            console.error("Error en la búsqueda AJAX:", status, error, xhr.responseText);
-            $('#product-list').html('<div class="col-12 text-center"><div class="alert-info-custom"><i class="fas fa-exclamation-triangle me-2"></i>Ocurrió un error al buscar los productos.</div></div>');
-        }
-    });
-}
+        $.ajax({
+            // La URL debe apuntar al controlador y acción correctos.
+            url: 'index.php?c=productos&a=listarofertas', // URL base del controlador/acción
+            method: 'GET',
+            data: {
+                // Se envían los datos como un objeto para que jQuery los formatee correctamente en la URL
+                query: query,
+                id_categoria: categoriaId,
+                filtro: filtro
+            },
+            success: function(response) {
+                // ¡CORREGIDO! Ahora actualiza el div correcto: #product-list
+                // La respuesta debe contener el HTML de los nuevos productos
+                $('#product-list').html(response); 
+            },
+            error: function(xhr, status, error) {
+                // Manejo de errores más detallado
+                console.error("Error en la búsqueda AJAX:", status, error, xhr.responseText);
+                $('#product-list').html('<div class="col-12 text-center"><div class="alert-info-custom"><i class="fas fa-exclamation-triangle me-2"></i>Ocurrió un error al buscar los productos.</div></div>');
+            }
+        });
+    }
 
     // Escuchar el evento 'input' en el campo de búsqueda
     $('#search-input').on('input', function() {
         const query = $(this).val();
+        // Solo busca si la longitud es > 2 (para evitar búsquedas excesivas) o si se vacía (para recargar la lista completa).
         if (query.length > 2 || query.length === 0) { 
             searchProducts(query);
         }
     });
 
+    // Inserción de estilos dinámicos (CSS)
+    // Asumiendo que las variables CSS (--card-bg, --accent-blue, etc.) están definidas en un archivo CSS principal.
     $('head').append(`
     <style>
         .search-bar .form-control {

@@ -27,6 +27,8 @@ class clienteController {
 
         $cliente = $this->model->obtenerUsuario($_SESSION['user_id']);
         $compras = $this->venta->obtenerVentaCliente($_SESSION['user_id']);
+        $puntoss = $this->model->obtenerPuntos($_SESSION['user_id']);
+        $puntos =$this->model->listarpuntos($_SESSION['user_id']);
         require_once 'view/header.php';
         require_once 'view/clientes/clientes.php';
         require_once 'view/footer.php';

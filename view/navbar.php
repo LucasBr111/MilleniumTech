@@ -22,7 +22,7 @@
                     <a class="nav-link" href="index.php?c=home&a=index">Inicio</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="index.php?c=ofertas&a=index">Ofertas</a>
+                    <a class="nav-link" href="index.php?c=productos&a=ofertas">Ofertas</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="index.php?c=novedades&a=index">Novedades</a>
@@ -108,7 +108,7 @@
                 <h6 class="mobile-section-title">Navegación</h6>
                 <ul class="mobile-nav-list">
                     <li><a href="index.php?c=home&a=index"><i class="fas fa-home"></i>Inicio</a></li>
-                    <li><a href="index.php?c=ofertas&a=index"><i class="fas fa-tags"></i>Ofertas</a></li>
+                    <li><a href="index.php?c=productos&a=ofertas"><i class="fas fa-tags"></i>Ofertas</a></li>
                     <li><a href="index.php?c=novedades&a=index"><i class="fas fa-star"></i>Novedades</a></li>
                 </ul>
             </div>
@@ -143,7 +143,7 @@
             </div>
             <span class="bottom-nav-label">Inicio</span>
         </a>
-        <a href="index.php?c=ofertas&a=index" class="bottom-nav-item">
+        <a href="index.php?c=productos&a=ofertas" class="bottom-nav-item">
             <div class="bottom-nav-icon">
                 <i class="fas fa-fire"></i>
             </div>

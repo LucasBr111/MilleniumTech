@@ -187,7 +187,7 @@ public function registrar($data)
             $sql = "SELECT 
                 v.id_venta AS id_venta,
                 v.id,
-                v.total,                      
+                sum(v.total) as total,                      
                 v.estado_pago AS estado,       
                 v.fecha_venta AS fecha,       
                 v.observaciones AS direccion_envio 
@@ -201,6 +201,30 @@ public function registrar($data)
     
             $stm = $this->pdo->prepare($sql);
             $stm->execute([$id_cliente]);
+            return $stm->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function obtenerDetallesVenta($id_venta)
+    {
+        try {
+            $sql = "SELECT 
+                v.id_venta,
+                v.id_producto,
+                p.nombre_producto AS nombre_producto,
+                v.cantidad,
+                v.precio_unitario,
+                v.descuento,
+                v.impuesto,
+                v.total
+                FROM ventas v
+                JOIN productos p ON v.id_producto = p.id_producto
+                WHERE v.id_venta = ?";
+    
+            $stm = $this->pdo->prepare($sql);
+            $stm->execute([$id_venta]);
             return $stm->fetchAll(PDO::FETCH_OBJ);
         } catch (Exception $e) {
             die($e->getMessage());

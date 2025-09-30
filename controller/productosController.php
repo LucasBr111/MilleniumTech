@@ -48,6 +48,26 @@ class productosController
        
     }
 
+    public function ofertas(){
+        $filtro = $_REQUEST['filtro'] ?? null;
+        $terminoBusqueda = $_REQUEST['query'] ?? null;
+
+        $productos = $this->model->ListarOfertas($filtro, $terminoBusqueda);
+
+        require_once 'view/header.php';
+        require_once './view/productos/productos-ofertas.php';
+        require_once 'view/footer.php';
+    }
+
+    public function listarofertas(){
+        $filtro = $_REQUEST['filtro'];
+        $terminoBusqueda = $_REQUEST['query'] ;
+
+        $productos = $this->model->ListarOfertas($filtro, $terminoBusqueda);
+
+        include './view/productos/listado-productos.php';
+    }
+
 
     public function crud()
     {
