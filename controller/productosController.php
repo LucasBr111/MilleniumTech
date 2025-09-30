@@ -59,6 +59,12 @@ class productosController
         require_once 'view/footer.php';
     }
 
+    public function novedades(){
+        require_once 'view/header.php';
+        require_once './view/productos/productos-novedades.php';
+        require_once 'view/footer.php';
+    }
+
     public function listarofertas(){
         $filtro = $_REQUEST['filtro'];
         $terminoBusqueda = $_REQUEST['query'] ;

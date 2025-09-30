@@ -25,7 +25,7 @@
                     <a class="nav-link" href="index.php?c=productos&a=ofertas">Ofertas</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="index.php?c=novedades&a=index">Novedades</a>
+                    <a class="nav-link" href="index.php?c=productos&a=novedades">Novedades</a>
                 </li>
             </ul>
         </div>
@@ -109,7 +109,7 @@
                 <ul class="mobile-nav-list">
                     <li><a href="index.php?c=home&a=index"><i class="fas fa-home"></i>Inicio</a></li>
                     <li><a href="index.php?c=productos&a=ofertas"><i class="fas fa-tags"></i>Ofertas</a></li>
-                    <li><a href="index.php?c=novedades&a=index"><i class="fas fa-star"></i>Novedades</a></li>
+                    <li><a href="index.php?c=productos&a=novedades"><i class="fas fa-star"></i>Novedades</a></li>
                 </ul>
             </div>
             <div class="mobile-nav-section">
