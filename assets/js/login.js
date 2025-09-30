@@ -181,16 +181,31 @@ $(document).ready(function() {
             },
             dataType: 'json',
             success: function(response) {
-                console.log('Respuesta del login:', response);
-                
                 if (response.status === 'success') {
                     // Login exitoso
-                    alert('¡Login exitoso! Redirigiendo...');
-                    window.location.href = 'index.php?c=home';
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Login exitoso!',
+                        text: response.success,
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    }).then(() => {
+                        // Redirección después del toast
+                        window.location.href = 'index.php?c=home';
+                    });
+                
                 } else {
-                    // Error en el login
-                    alert('Error: ' + response.message);
+                    // Error en el login con SweetAlert
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error en el login',
+                        text: response.message,
+                        confirmButtonText: 'Intentar de nuevo'
+                    });
                 }
+                
             },
             error: function(xhr, status, error) {
                 console.error('Error en login:', error);

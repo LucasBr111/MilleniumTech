@@ -1,123 +1,179 @@
-/* Variables de color de la marca (asegúrate de que estén en estilos-generales.css también) */
 :root {
-    --blanco-marmol: #F8F9FA;
-    --dorado-elegante: #D4AF37;
-    --bordo-profundo: #520017;
-    --verde-jade: #006B54;
-    --negro-futurista: #121212;
-    --gris-texto: #6c757d;
+    --primary-gold: #FFD700;
+    --dark-bg: #1a1a1a;
+    --card-bg: #2a2a2a;
+    --text-muted: #A0AEC0;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Fondo animado del cuerpo */
+/* Fondo animado mejorado */
 .auth-body {
     margin: 0;
     padding: 0;
-    height: 100vh;
-    overflow: hidden; /* Evitar scroll si la animación es grande */
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
     font-family: 'Poppins', sans-serif;
-    background-color: var(--blanco-marmol); /* Fallback */
+    background: var(--dark-bg);
+    overflow-x: hidden;
 }
 
 .background-animation {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, var(--blanco-marmol) 0%, var(--dorado-elegante) 25%, var(--bordo-profundo) 50%, var(--verde-jade) 75%, var(--blanco-marmol) 100%);
-    background-size: 400% 400%;
-    animation: gradientAnimation 15s ease infinite;
-    z-index: -1; /* Detrás del contenido */
-    opacity: 0.1; /* Transparencia para que sea sutil */
+    background: radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(255, 165, 0, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, var(--dark-bg) 0%, #2d2d2d 100%);
+    z-index: 0;
 }
 
-@keyframes gradientAnimation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+.background-animation::before,
+.background-animation::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+    animation: float 15s ease-in-out infinite;
 }
 
-/* Contenedor principal de autenticación */
+.background-animation::before {
+    width: 400px;
+    height: 400px;
+    top: -100px;
+    left: -100px;
+    animation-delay: 0s;
+}
+
+.background-animation::after {
+    width: 500px;
+    height: 500px;
+    bottom: -150px;
+    right: -150px;
+    animation-delay: 7s;
+}
+
+@keyframes float {
+    0%, 100% { 
+        transform: translate(0, 0) scale(1);
+        opacity: 0.5;
+    }
+    50% { 
+        transform: translate(50px, 50px) scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+/* Contenedor principal */
 .auth-container {
     position: relative;
     width: 100%;
-    max-width: 400px; /* Ancho máximo para el formulario */
+    max-width: 450px;
     margin: 20px;
-    perspective: 1000px; /* Para la animación 3D de volteo si la añadimos */
+    z-index: 1;
 }
 
-/* Tarjetas de formulario */
+/* Tarjetas de formulario mejoradas */
 .auth-card {
-    background-color: var(--blanco-marmol);
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    padding: 30px;
+    background: var(--card-bg);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    padding: 40px;
     text-align: center;
-    transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
-    position: absolute; /* Para superponer y ocultar */
+    transition: var(--transition);
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    backface-visibility: hidden; /* Ocultar la parte trasera en la animación 3D */
     opacity: 0;
-    transform: rotateY(180deg); /* Inicialmente girado para la transición */
+    transform: translateY(30px) scale(0.95);
+    pointer-events: none;
+    border: 1px solid rgba(255, 215, 0, 0.1);
+    backdrop-filter: blur(10px);
 }
 
 .auth-card.active {
     opacity: 1;
-    transform: rotateY(0deg);
-    position: relative; /* Para que ocupe espacio cuando esté activo */
+    transform: translateY(0) scale(1);
+    position: relative;
+    pointer-events: auto;
 }
 
-/* Cabecera del formulario */
+/* Cabecera mejorada */
 .auth-header {
-    margin-bottom: 25px;
+    margin-bottom: 30px;
     position: relative;
 }
 
 .auth-logo {
-    max-width: 80px;
-    margin-bottom: 15px;
+    max-width: 90px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 4px 15px rgba(255, 215, 0, 0.3));
+    animation: logoGlow 3s ease-in-out infinite;
+}
+
+@keyframes logoGlow {
+    0%, 100% { 
+        filter: drop-shadow(0 4px 15px rgba(255, 215, 0, 0.3));
+    }
+    50% { 
+        filter: drop-shadow(0 4px 25px rgba(255, 215, 0, 0.5));
+    }
 }
 
 .auth-title {
     font-family: 'Cinzel', serif;
-    font-size: 2.2rem;
-    color: var(--negro-futurista);
-    margin-bottom: 5px;
+    font-size: 2rem;
+    color: #fff;
+    margin-bottom: 8px;
+    font-weight: 700;
+    text-shadow: 0 2px 15px rgba(255, 215, 0, 0.2);
 }
 
 .auth-subtitle {
     font-size: 1rem;
-    color: var(--gris-texto);
+    color: var(--text-muted);
+    font-weight: 400;
 }
 
 .back-link {
     position: absolute;
     left: 0;
-    top: 10px;
-    color: var(--negro-futurista);
-    font-size: 1.2rem;
-    transition: color 0.3s ease;
+    top: 15px;
+    color: var(--text-muted);
+    font-size: 1.3rem;
+    transition: var(--transition);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .back-link:hover {
-    color: var(--dorado-elegante);
+    color: var(--primary-gold);
+    background: rgba(255, 215, 0, 0.1);
+    transform: translateX(-3px);
 }
 
-/* Grupos de formulario con iconos */
+/* Grupos de formulario con iconos mejorados */
 .form-group {
     text-align: left;
+    margin-bottom: 20px;
 }
 
 .form-label {
-    color: var(--negro-futurista);
-    font-weight: 500;
-    margin-bottom: 8px;
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    display: block;
 }
 
 .input-icon-group {
@@ -125,99 +181,304 @@
 }
 
 .input-icon-group .form-control {
-    padding-left: 40px; /* Espacio para el icono izquierdo */
-    border-radius: 8px;
-    border: 1px solid #ced4da;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    padding: 14px 45px 14px 45px;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 1rem;
+    transition: var(--transition);
+    backdrop-filter: blur(10px);
+}
+
+.input-icon-group .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .input-icon-group .form-control:focus {
-    border-color: var(--dorado-elegante);
-    box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25);
+    border-color: var(--primary-gold);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.1);
+    outline: none;
 }
 
 .input-icon-group .icon-left {
     position: absolute;
-    left: 15px;
+    left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--gris-texto);
-    pointer-events: none; /* Para que el input sea clickeable a través del icono */
+    color: var(--text-muted);
+    pointer-events: none;
+    font-size: 1.1rem;
+    transition: var(--transition);
+}
+
+.input-icon-group .form-control:focus ~ .icon-left {
+    color: var(--primary-gold);
 }
 
 .toggle-password {
     position: absolute;
-    right: 15px;
+    right: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--gris-texto);
+    color: var(--text-muted);
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: var(--transition);
+    font-size: 1.1rem;
+    z-index: 10;
 }
 
 .toggle-password:hover {
-    color: var(--negro-futurista);
+    color: var(--primary-gold);
 }
 
-/* Links y botones */
-.forgot-password-link, .auth-switch-link {
-    color: var(--dorado-elegante);
+/* Links mejorados */
+.forgot-password-link,
+.auth-switch-link {
+    color: var(--primary-gold);
     text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s ease;
+    font-weight: 600;
+    transition: var(--transition);
+    font-size: 0.95rem;
 }
 
-.forgot-password-link:hover, .auth-switch-link:hover {
-    color: var(--bordo-profundo);
-    text-decoration: underline;
+.forgot-password-link:hover,
+.auth-switch-link:hover {
+    color: #FFA500;
+    text-decoration: none;
 }
 
+/* Botón principal mejorado */
 .auth-btn {
-    background-color: var(--bordo-profundo);
-    color: var(--blanco-marmol);
+    background: linear-gradient(135deg, var(--primary-gold) 0%, #FFA500 100%);
+    color: #000;
     border: none;
     border-radius: 50px;
-    padding: 12px 30px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
+    padding: 14px 30px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    transition: var(--transition);
     width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+    cursor: pointer;
+    margin-top: 10px;
 }
 
 .auth-btn:hover {
-    background-color: var(--verde-jade);
+    background: linear-gradient(135deg, #FFA500 0%, var(--primary-gold) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    color: var(--blanco-marmol);
+    box-shadow: 0 6px 30px rgba(255, 215, 0, 0.5);
+    color: #000;
+}
+
+.auth-btn:active {
+    transform: translateY(0);
 }
 
 /* Pie de formulario */
 .auth-footer {
     margin-top: 30px;
-    font-size: 0.9rem;
-    color: var(--gris-texto);
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    padding-top: 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Mensajes de feedback */
+/* Mensajes de feedback mejorados */
 .form-text {
     font-size: 0.85rem;
-    margin-top: 5px;
+    margin-top: 8px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    display: inline-block;
 }
 
-.text-success { color: var(--verde-jade) !important; }
-.text-danger { color: var(--bordo-profundo) !important; }
-.text-warning { color: var(--dorado-elegante) !important; }
+.text-success {
+    color: #00b894 !important;
+    background: rgba(0, 184, 148, 0.1);
+}
 
+.text-danger {
+    color: #ff6b6b !important;
+    background: rgba(255, 107, 107, 0.1);
+}
 
-/* Responsiveness */
-@media (max-width: 768px) {
-    .auth-title {
-        font-size: 1.8rem;
+.text-warning {
+    color: var(--primary-gold) !important;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+/* Espaciado entre elementos del formulario */
+.d-flex.justify-content-between {
+    margin-bottom: 25px;
+}
+
+/* Animación de entrada */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
     }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-card.active {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Efectos de carga en inputs */
+.input-icon-group .form-control:valid {
+    border-color: rgba(0, 184, 148, 0.3);
+}
+
+.input-icon-group .form-control:invalid:not(:placeholder-shown) {
+    border-color: rgba(255, 107, 107, 0.3);
+}
+
+/* Mejoras para autocomplete del navegador */
+.input-icon-group .form-control:-webkit-autofill,
+.input-icon-group .form-control:-webkit-autofill:hover,
+.input-icon-group .form-control:-webkit-autofill:focus {
+    -webkit-text-fill-color: #fff;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.05) inset;
+    transition: background-color 5000s ease-in-out 0s;
+    border-color: var(--primary-gold);
+}
+
+/* Responsividad mejorada */
+@media (max-width: 768px) {
+    .auth-container {
+        max-width: 100%;
+        padding: 0 15px;
+    }
+
+    .auth-card {
+        padding: 30px 25px;
+    }
+
+    .auth-title {
+        font-size: 1.75rem;
+    }
+
     .auth-subtitle {
         font-size: 0.9rem;
     }
-    .auth-card {
-        padding: 25px;
+
+    .auth-logo {
+        max-width: 75px;
     }
+
+    .back-link {
+        width: 35px;
+        height: 35px;
+        font-size: 1.1rem;
+    }
+
+    .input-icon-group .form-control {
+        padding: 12px 40px 12px 40px;
+        font-size: 0.95rem;
+    }
+
+    .auth-btn {
+        padding: 13px 25px;
+        font-size: 1rem;
+    }
+
+    .background-animation::before,
+    .background-animation::after {
+        width: 300px;
+        height: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 25px 20px;
+        border-radius: 20px;
+    }
+
+    .auth-title {
+        font-size: 1.5rem;
+    }
+
+    .auth-logo {
+        max-width: 65px;
+        margin-bottom: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .auth-footer {
+        margin-top: 25px;
+        padding-top: 20px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Mejoras de accesibilidad */
+.form-control:focus {
+    outline: none;
+}
+
+button:focus,
+a:focus {
+    outline: 2px solid var(--primary-gold);
+    outline-offset: 2px;
+}
+
+/* Efectos adicionales para mejorar la experiencia */
+.auth-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-gold), #FFA500);
+    border-radius: 24px 24px 0 0;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.auth-card.active::before {
+    opacity: 1;
+}
+
+/* Mejora en el espaciado de botones y enlaces */
+.forgot-password-link {
+    font-size: 0.9rem;
+}
+
+/* Spinner de carga (opcional, por si lo necesitas) */
+.auth-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.auth-btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 3px solid rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    border-top-color: #000;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }

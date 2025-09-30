@@ -66,7 +66,6 @@
                         <li><a class="dropdown-item" href="index.php?c=login&a=logout"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
                     <?php else: ?>
                         <li><a class="dropdown-item" href="index.php?c=login&a=index"><i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión</a></li>
-                        <li><a class="dropdown-item" href="index.php?c=register&a=index"><i class="fas fa-user-plus me-2"></i>Registrarse</a></li>
                     <?php endif; ?>
                 </ul>
             </li>
@@ -126,7 +125,6 @@
                         <li><a class="dropdown-item" href="index.php?c=login&a=logout"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
                     <?php else: ?>
                         <li><a class="dropdown-item" href="index.php?c=login&a=index"><i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión</a></li>
-                        <li><a class="dropdown-item" href="index.php?c=register&a=index"><i class="fas fa-user-plus me-2"></i>Registrarse</a></li>
                     <?php endif; ?>
                 </ul>
             </div>

@@ -18,10 +18,10 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="filterDropdown">
                         <li><h6 class="dropdown-header">Ordenar por:</h6></li>
-                        <li><a class="dropdown-item <?= ($filtro === 'precio_asc') ? 'active' : '' ?>" href="index.php?c=productos&id_categoria=<?= htmlspecialchars($id_categoria) ?>&filtro=precio_asc">Precio (menor a mayor)</a></li>
-                        <li><a class="dropdown-item <?= ($filtro === 'precio_desc') ? 'active' : '' ?>" href="index.php?c=productos&id_categoria=<?= htmlspecialchars($id_categoria) ?>&filtro=precio_desc">Precio (mayor a menor)</a></li>
-                        <li><a class="dropdown-item <?= ($filtro === 'nombre_asc') ? 'active' : '' ?>" href="index.php?c=productos&id_categoria=<?= htmlspecialchars($id_categoria) ?>&filtro=nombre_asc">Nombre (A-Z)</a></li>
-                        <li><a class="dropdown-item <?= ($filtro === 'nombre_desc') ? 'active' : '' ?>" href="index.php?c=productos&id_categoria=<?= htmlspecialchars($id_categoria) ?>&filtro=nombre_desc">Nombre (Z-A)</a></li>
+                        <li><a class="dropdown-item <?= ($filtro === 'precio_asc') ? 'active' : '' ?>" href="index.php?c=productos&a=ofertas&id_categoria=<?= htmlspecialchars($id_categoria) ?>&filtro=precio_asc">Precio (menor a mayor)</a></li>
+                        <li><a class="dropdown-item <?= ($filtro === 'precio_desc') ? 'active' : '' ?>" href="index.php?c=productos&a=ofertas&id_categoria=<?= htmlspecialchars($id_categoria) ?>&filtro=precio_desc">Precio (mayor a menor)</a></li>
+                        <li><a class="dropdown-item <?= ($filtro === 'nombre_asc') ? 'active' : '' ?>" href="index.php?c=productos&a=ofertas&id_categoria=<?= htmlspecialchars($id_categoria) ?>&filtro=nombre_asc">Nombre (A-Z)</a></li>
+                        <li><a class="dropdown-item <?= ($filtro === 'nombre_desc') ? 'active' : '' ?>" href="index.php?c=productos&a=ofertas&id_categoria=<?= htmlspecialchars($id_categoria) ?>&filtro=nombre_desc">Nombre (Z-A)</a></li>
                     </ul>
                 </div>
             </div>
