@@ -182,22 +182,24 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(response) {
                 if (response.status === 'success') {
-                    // Login exitoso
                     Swal.fire({
                         icon: 'success',
                         title: '¡Login exitoso!',
-                        text: response.success,
+                        text: response.success, // Muestra la bienvenida
                         timer: 2000,
                         showConfirmButton: false,
                         toast: true,
                         position: 'top-end'
                     }).then(() => {
-                        // Redirección después del toast
-                        window.location.href = 'index.php?c=home';
+                        if (response.user.nivel == 1) {
+                            window.location.href = "index.php?c=dashboard";
+                        } else {
+                            console.log('Redirigiendo a home para usuario nivel:', response.user.nivel);
+                            window.location.href = "index.php?c=home";
+                        }
                     });
-                
+            
                 } else {
-                    // Error en el login con SweetAlert
                     Swal.fire({
                         icon: 'error',
                         title: 'Error en el login',
@@ -205,8 +207,8 @@ $(document).ready(function() {
                         confirmButtonText: 'Intentar de nuevo'
                     });
                 }
-                
             },
+            
             error: function(xhr, status, error) {
                 console.error('Error en login:', error);
                 console.error('Respuesta del servidor:', xhr.responseText);

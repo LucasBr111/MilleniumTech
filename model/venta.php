@@ -270,4 +270,58 @@ class venta
             die($e->getMessage());
         }
     }
+
+    public function contarhoy()
+    {
+        try {
+            $stm = $this->pdo->query("SELECT COUNT(*) as total_hoy FROM ventas WHERE DATE(fecha_venta) = CURDATE()");
+            $result = $stm->fetch(PDO::FETCH_OBJ);
+            return (int)$result->total_hoy;
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function listarpendientes(){
+        try {
+            $sql = "SELECT v.*, 
+                           c.nombre AS cliente_nombre,
+                           p.nombre_producto AS producto_nombre
+                    FROM ventas v
+                    LEFT JOIN clientes c ON v.id_cliente = c.id
+                    LEFT JOIN productos p ON v.id_producto = p.id_producto
+                    WHERE v.estado_pago = 'pendiente'
+                    ORDER BY v.fecha_venta DESC";
+            
+            $stm = $this->pdo->prepare($sql);
+            $stm->execute();
+            return $stm->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function listarPagados()
+{
+    try {
+        $sql = "SELECT v.*, 
+                       c.nombre AS cliente_nombre, 
+                       p.nombre_producto AS producto_nombre
+                FROM ventas v
+                LEFT JOIN clientes c ON v.id_cliente = c.id
+                LEFT JOIN productos p ON v.id_producto = p.id_producto
+                WHERE v.estado_pago = 'pagado'
+                ORDER BY v.fecha_venta DESC";
+        
+        $stm = $this->pdo->prepare($sql);
+        $stm->execute();
+        return $stm->fetchAll(PDO::FETCH_OBJ);
+    } catch (Exception $e) {
+        die($e->getMessage());
+    }
+}
+
+    
+
+   
 }

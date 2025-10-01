@@ -6,6 +6,7 @@ if (session_status() == PHP_SESSION_NONE) {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <title>Millenium Tech ✨</title>
     <meta charset="utf-8" />
@@ -30,10 +31,10 @@ if (session_status() == PHP_SESSION_NONE) {
     <!-- ==============================
          BOOTSTRAP 5.3.3
     =============================== -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-          rel="stylesheet" 
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
-          crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous">
 
     <!-- ==============================
          DATATABLES
@@ -70,55 +71,63 @@ if (session_status() == PHP_SESSION_NONE) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Bootstrap 5.3.3 JS Bundle (incluye Popper.js) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
-            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
 
 </head>
 <style>
-        .page-header {
-            margin: 0px 0 20px;
-        }
+    .page-header {
+        margin: 0px 0 20px;
+    }
 
-        .my-class {
-            text-align: center;
-        }
+    .my-class {
+        text-align: center;
+    }
 
-        .my-class2 {
-            text-align: right;
-        }
+    .my-class2 {
+        text-align: right;
+    }
 
-        .swal-wide {
-            font-size: 15px;
-            width: 270px;
-            height: 80px;
-        }
+    .swal-wide {
+        font-size: 15px;
+        width: 270px;
+        height: 80px;
+    }
 
-        /* modal de alerta grande */
-        .swal-lg {
-            font-size: 15px;
-            min-width: 500px;
-            max-width: 700px;
-            height: fit-content;
-        }
+    /* modal de alerta grande */
+    .swal-lg {
+        font-size: 15px;
+        min-width: 500px;
+        max-width: 700px;
+        height: fit-content;
+    }
 
-        .notification-container {
-            position: relative;
-            display: inline-block;
-        }
+    .notification-container {
+        position: relative;
+        display: inline-block;
+    }
 
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: red;
-            color: white;
-            border-radius: 50%;
-            padding: 4px 8px;
-            font-size: 12px;
-        }
-    </style>
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: red;
+        color: white;
+        border-radius: 50%;
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+</style>
+
 <body>
-    <div class="d-flex wrapper" id="wrapper">
-        <div id="content" class="flex-grow-1 p-4">
-            <?php include "navbar.php"; ?>
+    <?php if (isset($_SESSION['isLoggedIn']) && $_SESSION['isLoggedIn'] === true && $_SESSION['nivel'] == 1): ?>
+        <div class="wrapper">
+                <?php include "sidebar.php"; ?>
+            <div style="width:100%;">
+                <div id="content" style="background-color: white">
+                <?php else: ?>
+                    <div class="d-flex wrapper" id="wrapper">
+                        <div id="content" class="flex-grow-1 p-4">
+                            <?php include "navbar.php"; ?>
+                        <?php endif; ?>

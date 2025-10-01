@@ -65,12 +65,14 @@ class loginController {
                     echo json_encode([
                         'status' => 'success', 
                         'message' => 'Login exitoso',
+                        'success' => '¡Bienvenido ' . $user->nombre . '!',
                         'user' => [
                             'nombre' => $user->nombre,
                             'email' => $user->email,
                             'nivel' => $user->nivel
                         ]
                     ]);
+                    
                 } else {
                     echo json_encode(['status' => 'error', 'message' => 'Error al obtener datos del usuario']);
                 }
@@ -98,6 +100,8 @@ class loginController {
         session_destroy();
         
         // Redireccionar al inicio con mensaje de sesión cerrada
-        header('Location: index.php?c=home');
+
+            header('Location: index.php?c=home');
+        
     }
 }

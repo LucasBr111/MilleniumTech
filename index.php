@@ -1,7 +1,7 @@
 <?php
 require_once "config/database/database.php";
 
-error_reporting(0);
+// error_reporting(0);
 $controller = isset($_GET['c']) ? $_GET['c'] : 'home'; 
 $action = isset($_GET['a']) ? $_GET['a'] : 'index'; 
 

@@ -72,6 +72,7 @@
         try {
             $sql = "SELECT 
         c.*,
+        v.direccion_envio as direccion,
         COALESCE(p.puntos, 0) as puntos,
         COUNT(DISTINCT v.id_venta) AS total_compras,
         COUNT(DISTINCT CASE WHEN v.estado_pago = 'pendiente' THEN v.id_venta END) AS compras_pendientes
@@ -173,6 +174,31 @@
         // Usar manejo de errores seguro, no die()
         error_log("Error al restar puntos: " . $e->getMessage());
         throw $e;
+    }
+}
+public function contarClientes(){
+    try {
+        $sql = "SELECT COUNT(*) as total FROM clientes";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_OBJ);
+        return $result ? (int)$result->total : 0;
+    } catch (Exception $e) {
+        die($e->getMessage());
+    }
+}
+
+public function listar()
+{
+    try {
+        $result = array();
+
+        $stm = $this->pdo->prepare("SELECT * FROM clientes");
+        $stm->execute();
+
+        return $stm->fetchAll(PDO::FETCH_OBJ);
+    } catch (Exception $e) {
+        die($e->getMessage());
     }
 }
 }

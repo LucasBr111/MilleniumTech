@@ -1,199 +1,238 @@
 <?php
-require_once 'model/categorias.php';
-$categoria = new categorias();
-$categorias_planas = $categoria->listar();
+// Define el nivel de acceso para el administrador (ajusta esto según tu lógica)
+$es_admin = (isset($_SESSION['nivel']) && $_SESSION['nivel'] == 1);
+// Ajuste para que el controlador siempre sea 'dashboard'
+$controlador_actual = 'dashboard'; 
+$accion_actual = $_GET['a'] ?? 'inicio'; // Asume 'inicio' como acción por defecto
 
-$categorias_agrupadas = [];
-foreach ($categorias_planas as $cat) {
-    if (!isset($categorias_agrupadas[$cat->grupo])) {
-        $grupo = new stdClass();
-        $grupo->titulo = $cat->grupo;
-        $grupo->icono = $cat->icono;
-        $grupo->items = [];
-        $categorias_agrupadas[$cat->grupo] = $grupo;
-    }
-    $item = new stdClass();
-    $item->id = $cat->id_categoria;
-    $item->nombre = $cat->nombre_categoria;
-    $item->icono = $cat->icono;
-    $categorias_agrupadas[$cat->grupo]->items[] = $item;
+// Función auxiliar para determinar si una opción está activa
+function esActivo($a, $accion_actual) {
+    // Si la acción es 'index', la comparamos con 'inicio' si es la predeterminada.
+    // Para simplificar, comparamos directamente la acción
+    return ($accion_actual === $a) ? 'active' : '';
 }
-
-$categorias = $categorias_agrupadas;
 ?>
 
-<div id="sidebar-container" class="custom-sidebar">
-    <nav id="sidebar" class="sidebar p-3">
-        <div class="sidebar-title">
-            <span>CATEGORÍAS</span>
-        </div>
-        <hr class="sidebar-divider">
+<nav id="sidebar" class="d-flex flex-column h-100">
+    <div class="sidebar-header p-3 border-bottom">
+        <h3 class="fw-bold text-primary">Admin Panel</h3>
+    </div>
 
-        <ul class="list-unstyled sidebar-menu categories-list">
-            <?php foreach ($categorias_agrupadas as $grupo): ?>
+    <ul class="list-unstyled flex-grow-1 overflow-auto pt-2">
+        <?php if ($es_admin) { // Solo si el usuario es un administrador ?>
+
+            <li class="nav-item">
+                <p class="text-muted small fw-bold text-uppercase px-3 pt-3 mb-0">Principal</p>
+            </li>
+            
+            <li class="nav-item <?php echo esActivo('inicio', $accion_actual); ?>">
+                <a href="?c=dashboard&a=inicio" class="nav-link py-2 d-flex align-items-center">
+                    <i class="fas fa-chart-line me-3 fa-fw"></i> Dashboard
+                </a>
+            </li>
+            
+            <li class="nav-item <?php echo esActivo('pedidos_pendientes', $accion_actual); ?>">
+                <a href="?c=dashboard&a=pedidos_pendientes" class="nav-link py-2 d-flex align-items-center">
+                    <i class="fas fa-shopping-cart me-3 fa-fw"></i> Pedidos Pendientes <span class="badge rounded-pill bg-danger ms-auto">23</span>
+                </a>
+            </li>
+            
+            <li class="nav-item <?php echo esActivo('listado_ventas', $accion_actual); ?>">
+                <a href="?c=dashboard&a=listado_ventas" class="nav-link py-2 d-flex align-items-center">
+                    <i class="fas fa-file-invoice-dollar me-3 fa-fw"></i> Listado de Ventas
+                </a>
+            </li>
+
+            <li class="nav-item mt-3 border-top">
+                <p class="text-muted small fw-bold text-uppercase px-3 pt-3 mb-0">Catálogo</p>
+            </li>
+            
+            <li class="nav-item <?php echo esActivo('productos', $accion_actual); ?>">
+                <a href="?c=dashboard&a=productos" class="nav-link py-2 d-flex align-items-center">
+                    <i class="fas fa-box-open me-3 fa-fw"></i> Productos
+                </a>
+            </li>
+            
+            <li class="nav-item <?php echo esActivo('categorias', $accion_actual); ?>">
+                <a href="?c=dashboard&a=categorias" class="nav-link py-2 d-flex align-items-center">
+                    <i class="fas fa-tags me-3 fa-fw"></i> Categorías
+                </a>
+            </li>
+            
+            <?php $submenu_caja_activa = in_array($accion_actual, ['metodos_pago', 'impuestos', 'monedas']); ?>
+            
+            <li class="nav-item <?php if ($submenu_caja_activa) echo 'active-parent'; ?>">
+                <a href="#configSubmenu" data-bs-toggle="collapse" aria-expanded="<?php echo $submenu_caja_activa ? 'true' : 'false'; ?>" 
+                   class="nav-link py-2 d-flex align-items-center dropdown-toggle <?php echo $submenu_caja_activa ? '' : 'collapsed'; ?>">
+                    <i class="fas fa-cog me-3 fa-fw"></i> Config. Venta
+                </a>
+                
+                <ul class="collapse list-unstyled <?php if ($submenu_caja_activa) echo 'show'; ?>" id="configSubmenu">
+                    <li class="<?php echo esActivo('metodos_pago', $accion_actual); ?>">
+                        <a href="?c=dashboard&a=metodos_pago" class="nav-link py-2 d-flex align-items-center submenu-link">
+                            <i class="far fa-credit-card me-3 fa-fw"></i> Métodos de Pago
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="nav-item mt-3 border-top">
+                <p class="text-muted small fw-bold text-uppercase px-3 pt-3 mb-0">Administración</p>
+            </li>
+            
+            <li class="nav-item <?php echo esActivo('clientes', $accion_actual); ?>">
+                <a href="?c=dashboard&a=clientes" class="nav-link py-2 d-flex align-items-center">
+                    <i class="fas fa-users me-3 fa-fw"></i> Clientes
+                </a>
+            </li>
+<!--             
+            <li class="nav-item <?php echo esActivo('usuarios_roles', $accion_actual); ?>">
+                <a href="?c=dashboard&a=usuarios_roles" class="nav-link py-2 d-flex align-items-center">
+                    <i class="fas fa-user-shield me-3 fa-fw"></i> Usuarios & Roles
+                </a>
+            </li> -->
+
+            <li class="nav-item <?php echo esActivo('reportes', $accion_actual); ?>">
+                <a href="?c=dashboard&a=reportes" class="nav-link py-2 d-flex align-items-center">
+                    <i class="fas fa-chart-pie me-3 fa-fw"></i> Reportes & Analíticas
+                </a>
+            </li>
+            
+            <li class="nav-item mt-3 border-top">
+                <p class="text-muted small fw-bold text-uppercase px-3 pt-3 mb-0">Utilidades</p>
+            </li>
+            
+            <li class="nav-item <?php echo esActivo('chat_ia', $accion_actual); ?>">
+                <a href="?c=dashboard&a=chat_ia" class="nav-link py-2 d-flex align-items-center">
+                    <i class="fas fa-robot me-3 fa-fw"></i> Chat IA Soporte
+                </a>
+            </li>
+    
+            <div class="mt-auto border-top p-3">
                 <li class="nav-item">
-                    <a href="#<?= str_replace(' ', '', $grupo->titulo) ?>Menu"
-                       data-bs-toggle="collapse"
-                       class="dropdown-toggle nav-link">
-                        <i class="<?= $grupo->icono ?> me-2"></i>
-                        <span><?= $grupo->titulo ?></span>
+                    <a class="nav-link btn btn-outline-danger btn-sm text-start" href="index.php?c=login&a=logout">
+                        <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
                     </a>
-                    <ul class="collapse list-unstyled" id="<?= str_replace(' ', '', $grupo->titulo) ?>Menu">
-                        <?php foreach ($grupo->items as $item): ?>
-                            <li>
-                                <a href="index.php?c=producto&a=listar&id_categoria=<?= $item->id ?>" class="nav-link sub-link">
-                                    <i class="<?= $item->icono ?> me-2"></i><span><?= $item->nombre ?></span>
-                                </a>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
                 </li>
-            <?php endforeach; ?>
-        </ul>
-    </nav>
-</div>
+            </div>
+
+        <?php } ?>
+    </ul>
+</nav>
 
 <style>
-/* Variables de color de la navbar */
-:root {
-    --blanco-marmol: #F8F9FA;
-    --dorado-elegante: #D4AF37;
-    --bordo-profundo: #520017;
-    --verde-jade: #006B54;
-    --negro-futurista: #121212; /* Un negro más suave */
+    /* Estilos Generales y Reset Básico */
+body {
+    font-family: 'Poppins', sans-serif; /* Se asume esta fuente moderna */
+    background: #f8f9fa; /* Fondo muy claro de Bootstrap */
+    color: #343a40;
+    margin: 0;
 }
 
-/* Contenedor principal de la card (nueva) */
-.custom-sidebar {
-    background-color: var(--blanco-marmol);
-    width: 300px;
-    height: calc(100vh - 85px); /* Espacio con la navbar */
+/* Contenedor principal que envuelve sidebar y contenido */
+#wrapper {
+    display: flex;
+    width: 100%;
+    min-height: 100vh; /* Asegura que ocupe toda la altura */
+}
+
+/* Sidebar Estilos - Fijo y Moderno */
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    background: #ffffff; /* Fondo blanco */
+    color: #495057; /* Texto más oscuro para mejor contraste */
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02); /* Sombra más moderna */
+    height: 100vh;
     position: fixed;
-    top: 125px; /* Altura de la navbar + espacio */
-    left: -250px; /* Posición inicial, oculta */
-    z-index: 1000;
-    transition: all 0.4s ease-in-out; /* Transición más fluida */
-    border-radius: 8px; /* Esquinas menos redondeadas */
-    /* Sombra para el efecto de profundidad */
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 40px rgba(212, 175, 55, 0.1);
-    margin-left: 10px; /* Margen para separar de la izquierda */
-    overflow-y: auto; /* Scroll si el contenido es muy largo */
+    /* Usamos flex-column y flex-grow-1 en el HTML para el scroll y el footer */
 }
 
-.custom-sidebar.active {
-    left: 0;
+/* Encabezado de la Sidebar */
+.sidebar-header {
+    /* Clases de Bootstrap aplicadas en HTML */
 }
 
-/* Ocultar la barra de scroll */
-.custom-sidebar::-webkit-scrollbar {
-    display: none;
+/* Estilos de los Grupos (los <p> que ahora son clases de Bootstrap) */
+.list-unstyled p {
+    color: #adb5bd !important; /* Gris claro para los títulos */
+    letter-spacing: 0.5px; /* Espaciado sutil */
 }
 
-.custom-sidebar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-}
-
-/* Estilos de la sidebar interna (la que contiene el menú) */
-.sidebar {
-    padding: 1.5rem !important;
-}
-
-.sidebar-divider {
-    border-top: 1px solid rgba(212, 175, 55, 0.2);
-    margin: 1rem 0;
-}
-
-/* Título de la sección de categorías */
-.sidebar-title {
-    color: var(--dorado-elegante);
-    font-family: 'Cinzel', serif; /* o 'Playfair Display' */
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    text-align: left;
-    margin: 1.5rem 0 1rem;
-}
-
-/* Estilos de los enlaces de la sidebar */
-.sidebar-menu .nav-link {
-    font-family: 'Poppins', 'Montserrat', sans-serif;
+/* Estilos de los Enlaces (Links) */
+#sidebar ul li a {
+    color: #495057;
+    text-decoration: none;
+    transition: all 0.2s;
     font-weight: 500;
-    color: var(--negro-futurista) !important;
-    transition: all 0.3s ease;
-    padding: 12px 15px;
-    border-radius: 4px; /* Bordes más sutiles en los enlaces */
+    border-radius: 4px; /* Bordes redondeados sutiles */
+    margin: 0 10px; /* Margen para no tocar los bordes */
+    padding-left: 10px !important; /* Ajuste para el ícono y el texto */
+}
+#sidebar ul li a:hover {
+    color: #0d6efd; /* Color primario de Bootstrap */
+    background: #e9ecef; /* Fondo muy claro al pasar el ratón */
+}
+
+/* Estado Activo */
+#sidebar ul li.active > a, 
+#sidebar ul li.active-parent > a, /* Para el elemento padre del submenú */
+#sidebar a[aria-expanded="true"] {
+    color: #ffffff; /* Texto blanco para resaltar */
+    background: #0d6efd; /* Color primario de Bootstrap (Azul) */
+    font-weight: 600; /* Un poco más de peso */
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3); /* Sombra para el activo */
+}
+/* Asegura que el ícono tenga color blanco en estado activo */
+#sidebar ul li.active > a i,
+#sidebar ul li.active-parent > a i {
+    color: #ffffff;
+}
+
+/* Iconos */
+.fa-fw {
+    width: 1.25em; /* Ancho fijo para alineación perfecta */
+}
+.fa-fw {
+    color: #6c757d; /* Color por defecto de los iconos */
+}
+
+/* Estilos del Submenú */
+#configSubmenu {
+    background: #f8f9fa; /* Fondo sutilmente diferente */
+    padding-left: 15px; /* Sangría */
+    margin-top: 5px;
     margin-bottom: 5px;
 }
-
-.sidebar-menu .nav-link:hover {
-    background-color: transparent;
-    color: var(--dorado-elegante) !important;
-    box-shadow: inset 3px 0 0 var(--dorado-elegante); /* Efecto de línea */
+.submenu-link {
+    padding-left: 15px !important; /* Más sangría para los enlaces hijos */
+}
+.submenu-link i {
+    font-size: 0.8em; /* Iconos más pequeños en el submenú */
+    color: #6c757d;
+}
+/* Estado Activo en el Submenú */
+#configSubmenu li.active a {
+    background: #cfe2ff; /* Azul claro para enlaces activos del submenú */
+    color: #0d6efd;
+    font-weight: 500;
+}
+#configSubmenu li.active a i {
+    color: #0d6efd;
 }
 
-.sidebar-menu .nav-link i {
-    color: var(--negro-futurista); /* Color inicial de íconos */
-    transition: all 0.3s ease;
-}
-
-.sidebar-menu .nav-link:hover i {
-    color: var(--dorado-elegante);
-}
-
-.sidebar-menu .nav-link.dropdown-toggle::after {
-    color: var(--dorado-elegante);
-    float: right;
-    margin-top: 8px;
-    transform: rotate(0deg);
-    transition: transform 0.3s ease;
-}
-
-/* Estilo para los sub-menús desplegables */
-.sidebar-menu .collapse.show {
-    background-color: rgba(0, 0, 0, 0.05); /* Fondo gris claro para los submenús */
-    border-left: 2px solid var(--dorado-elegante);
-    border-radius: 4px;
-    padding: 5px 0;
-    margin-top: 5px;
-}
-
-.sidebar-menu .sub-link {
-    padding-left: 3.5rem; /* Aumenta el indentado para la jerarquía visual */
-    font-size: 0.95rem;
-    font-weight: 400; /* Ligeramente más delgado */
-}
-
-.sidebar-menu .sub-link i {
-    color: var(--negro-futurista);
-}
-
-.sidebar-menu .sub-link:hover {
-    background-color: transparent;
-    box-shadow: none;
-}
-
-.sidebar-menu .sub-link:hover span {
-    color: var(--bordo-profundo); /* Un toque de burdeos al pasar el cursor */
-}
-
-/* Alineación y desplazamiento del contenido con sidebar */
+/* Contenido Principal (Dashboard) */
 #content {
-    transition: margin-left 0.4s ease-in-out;
+    width: 100%;
+    padding: 20px;
+    transition: all 0.3s;
+    margin-left: 250px; /* Hace espacio para la sidebar fija */
 }
 
-#content.with-sidebar {
-    margin-left: 260px;
-}
-
-/* Sidebar visible por defecto en desktop y contenido desplazado */
-@media (min-width: 992px) {
-    .custom-sidebar {
-        left: 0;
-    }
-    #content {
-        margin-left: 260px;
-    }
+/* Badge de Notificaciones */
+.badge {
+    font-size: 0.75rem;
+    padding: 0.4em 0.6em;
 }
 </style>

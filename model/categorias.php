@@ -80,4 +80,16 @@ class categorias{
         }
     }
     
+
+    public function contarProductosPorCategoria($id_categoria){
+        try{
+            $stm = $this->pdo->prepare("SELECT COUNT(*) as total FROM productos WHERE id_categoria = ?");
+            $stm->execute(array($id_categoria));
+            $result = $stm->fetch(PDO::FETCH_OBJ);
+            return $result ? $result->total : 0;
+          
+        }catch(Exception $e){
+            die($e->getMessage());
+        }
+    }
 }
