@@ -149,7 +149,7 @@
     public function listarpuntos($id_cliente)
     {
         try {
-            $sql = "SELECT * FROM puntos WHERE id_cliente = ? ORDER BY fecha_obtencion DESC";
+            $sql = "SELECT * FROM puntos WHERE id_cliente = ? ORDER BY fecha_obtencion DESC LIMIT 10";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$id_cliente]);
             return $stmt->fetchAll(PDO::FETCH_OBJ);
@@ -157,4 +157,22 @@
             die($e->getMessage());
         }
     }
+
+    public function restarPuntos($id_cliente, $puntos_a_restar)
+{
+    try {
+        // El valor de los puntos debe ser NEGATIVO para descontar
+        $puntos_descontados = -$puntos_a_restar; 
+        
+        $sql = "INSERT INTO puntos (id_cliente, puntos, fecha_obtencion, descripcion) 
+                VALUES (?, ?, NOW(), 'Redencion de puntos')";
+        $stmt = $this->pdo->prepare($sql);
+        // Orden de parámetros: 1. id_cliente, 2. puntos_descontados
+        $stmt->execute([$id_cliente, $puntos_descontados]); 
+    } catch (Exception $e) {
+        // Usar manejo de errores seguro, no die()
+        error_log("Error al restar puntos: " . $e->getMessage());
+        throw $e;
+    }
+}
 }

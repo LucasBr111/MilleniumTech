@@ -4,18 +4,22 @@ require_once 'model/clientes.php';
 require_once 'model/carrito.php';
 require_once 'model/favoritos.php';
 require_once 'model/venta.php';
+require_once 'model/metodo.php';
 
 class clienteController {
     private $model;
     private $carrito;
     private $favoritos;
     private $venta;
+    private $metodo_pago;
+
 
     public function __construct() {
         $this->model = new clientes();
         $this->carrito = new carrito();
         $this->favoritos = new favoritos();
         $this->venta = new venta();
+        $this->metodo_pago = new metodo();
     }
 
     public function index() {

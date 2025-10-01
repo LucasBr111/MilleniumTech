@@ -137,7 +137,11 @@ class Productos
         try {
             if ($id_cliente !== null) {
                 // Si hay cliente → traer favoritos de ese cliente
-                $sql = "SELECT p.*, f.id AS es_favorito
+                $sql = "SELECT p.*, f.id AS es_favorito, CASE
+                    WHEN p.promo_desde <= CURDATE() AND p.promo_hasta >= CURDATE()
+                    THEN TRUE
+                    ELSE FALSE
+                END AS en_promocion
                         FROM productos p
                         LEFT JOIN favoritos f 
                             ON f.id_producto = p.id_producto 
@@ -303,5 +307,29 @@ class Productos
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    public function ListarImagenesGaleria($id_producto)
+    {
+        try {
+            $stm = $this->pdo->prepare("SELECT * FROM producto_imagenes WHERE id_producto = ?");
+            $stm->execute(array($id_producto));
+            return $stm->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function restarStock($id_producto, $cantidad)
+    {
+        try {
+            $sql = "UPDATE productos SET stock = stock - ? WHERE id_producto = ?";
+            $this->pdo->prepare($sql)
+                ->execute(array($cantidad, $id_producto));
+        } catch (Exception $e) {
+            // CORRECCIÓN: No uses die(). Registra el error y relanza.
+            error_log("Error al restar stock del producto {$id_producto} en la cantidad {$cantidad}: " . $e->getMessage());
+            throw new Exception("Error interno al actualizar el stock.");
+        }
     }
 }

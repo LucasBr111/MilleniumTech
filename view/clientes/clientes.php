@@ -1,8 +1,7 @@
-<!-- Vista: views/cliente/perfil.php -->
 <link rel="stylesheet" href="assets/styles/perfil.css">
 <div class="container-fluid" style="padding-top: 100px; min-height: 100vh;">
-<?php $esAdmin = isset($_SESSION['nivel']) && $_SESSION['nivel'] == 1; ?>
-    
+    <?php $esAdmin = isset($_SESSION['nivel']) && $_SESSION['nivel'] == 1; ?>
+
     <!-- Hero Profile Section -->
     <div class="row mb-5">
         <div class="col-12">
@@ -222,9 +221,6 @@
                         <h4>₲ <?php echo number_format(($puntoss ?? 0) * 100, 0, ',', '.'); ?></h4>
                         <small>1 punto = ₲ 100 en descuentos</small>
                     </div>
-                    <button class="btn-primary-custom" onclick="canjearPuntos()">
-                        <i class="fas fa-gift"></i> Canjear Puntos
-                    </button>
                 </div>
 
                 <div class="mt-4">
@@ -285,13 +281,6 @@
                             <p><strong>Total:</strong> <span id="detalle_total" class="precio-destacado"></span></p>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="detalle-seccion">
-                            <h6><i class="fas fa-map-marker-alt"></i> Dirección de Envío</h6>
-                            <p id="detalle_direccion"></p>
-                            <p><strong>Tracking:</strong> <span id="detalle_tracking"></span></p>
-                        </div>
-                    </div>
                     <div class="col-12">
                         <div class="detalle-seccion">
                             <h6><i class="fas fa-shopping-bag"></i> Productos</h6>
@@ -335,23 +324,23 @@
                 <form id="formConfirmarVenta">
                     <input type="hidden" id="id_venta" name="id_venta">
                     <input type="hidden" id="id_cliente" name="id_cliente" value="<?php echo $cliente->id; ?>">
-                    
+
                     <div class="row g-4">
-                        
+
                         <!-- SECCIÓN 1: DIRECCIÓN DE ENVÍO -->
                         <div class="col-md-6">
                             <div class="checkout-section">
                                 <h6 class="section-title">
                                     <i class="fas fa-map-marker-alt"></i> Dirección de Envío
                                 </h6>
-                                
+
                                 <div class="mb-3">
                                     <label class="form-label">Dirección Completa <span class="text-danger">*</span></label>
-                                    <textarea 
-                                        class="form-control" 
-                                        name="direccion_envio" 
+                                    <textarea
+                                        class="form-control"
+                                        name="direccion_envio"
                                         id="direccion_envio"
-                                        rows="3" 
+                                        rows="3"
                                         placeholder="Ej: Calle Palma 123, entre Alberdi y Cerro Corá"
                                         required></textarea>
                                     <small class="text-muted">Incluye calle, número, referencias</small>
@@ -359,10 +348,10 @@
 
                                 <div class="mb-3">
                                     <label class="form-label">Ciudad <span class="text-danger">*</span></label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        name="ciudad" 
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="ciudad"
                                         id="ciudad"
                                         placeholder="Ej: Asunción"
                                         required>
@@ -395,10 +384,10 @@
 
                                 <div class="mb-3">
                                     <label class="form-label">Teléfono de Contacto <span class="text-danger">*</span></label>
-                                    <input 
-                                        type="tel" 
-                                        class="form-control" 
-                                        name="telefono_contacto" 
+                                    <input
+                                        type="tel"
+                                        class="form-control"
+                                        name="telefono_contacto"
                                         id="telefono_contacto"
                                         value="<?php echo htmlspecialchars($cliente->telefono ?? ''); ?>"
                                         placeholder="Ej: 0981 123 456"
@@ -407,10 +396,10 @@
 
                                 <div class="mb-3">
                                     <label class="form-label">Referencias Adicionales</label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        name="referencias" 
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="referencias"
                                         id="referencias"
                                         placeholder="Ej: Casa de color blanco, portón negro">
                                 </div>
@@ -419,28 +408,26 @@
 
                         <!-- SECCIÓN 2: MÉTODO DE PAGO Y PUNTOS -->
                         <div class="col-md-6">
-                            
+
                             <!-- Método de Pago -->
                             <div class="checkout-section mb-4">
                                 <h6 class="section-title">
                                     <i class="fas fa-credit-card"></i> Método de Pago
                                 </h6>
-                                
+
                                 <div class="mb-3">
                                     <label class="form-label">Seleccionar Método <span class="text-danger">*</span></label>
-                                    <select class="form-select" name="id_metodo_pago" id="id_metodo_pago" required>
-                                        <option value="">Seleccionar...</option>
-                                        <?php 
-                                        if (isset($this->metodo_pago)) {
-                                            foreach ($this->metodo_pago->listar() as $metodo): 
+                                    <select class="form-select" name="metodo_pago" id="id_metodo_pago" required>
+                                        <?php
+
+                                        foreach ($this->metodo_pago->listar() as $metodo):
                                         ?>
-                                            <option value="<?php echo $metodo->id; ?>" 
-                                                    data-descripcion="<?php echo htmlspecialchars($metodo->descripcion ?? ''); ?>">
+                                            <option value="<?php echo $metodo->id; ?>">
                                                 <?php echo htmlspecialchars($metodo->nombre); ?>
                                             </option>
-                                        <?php 
-                                            endforeach;
-                                        }
+                                        <?php
+                                        endforeach;
+
                                         ?>
                                     </select>
                                 </div>
@@ -452,69 +439,69 @@
                             </div>
 
                             <!-- Canje de Puntos -->
-                            <?php if (isset($puntoss->total) && $puntoss->total > 0): ?>
-                            <div class="checkout-section">
-                                <h6 class="section-title">
-                                    <i class="fas fa-gift"></i> Canje de Puntos
-                                </h6>
-                                
-                                <div class="puntos-disponibles mb-3">
-                                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
-                                        <div>
-                                            <strong>Puntos Disponibles:</strong>
-                                            <span class="text-primary fs-5"><?php echo number_format($puntoss->total); ?></span>
-                                        </div>
-                                        <div class="text-end">
-                                            <small class="text-muted">Equivale a:</small>
-                                            <div class="text-success fw-bold">₲ <?php echo number_format($puntoss->total * 100, 0, ',', '.'); ?></div>
+                            <?php if (isset($puntoss) && $puntoss > 0): ?>
+                                <div class="checkout-section">
+                                    <h6 class="section-title">
+                                        <i class="fas fa-gift"></i> Canje de Puntos
+                                    </h6>
+
+                                    <div class="puntos-disponibles mb-3">
+                                        <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded text-black">
+                                            <div>
+                                                <strong>Puntos Disponibles:</strong>
+                                                <span class="text-primary fs-5"><?php echo number_format($puntoss); ?></span>
+                                            </div>
+                                            <div class="text-end">
+                                                <small class="text-muted">Equivale a:</small>
+                                                <div class="text-success fw-bold">₲ <?php echo number_format($puntoss * 100, 0, ',', '.'); ?></div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input 
-                                            class="form-check-input" 
-                                            type="checkbox" 
-                                            id="usar_puntos" 
-                                            name="usar_puntos"
-                                            value="1"
-                                            onchange="togglePuntos()">
-                                        <label class="form-check-label" for="usar_puntos">
-                                            Quiero usar mis puntos en esta compra
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div id="seccion_puntos" style="display: none;">
                                     <div class="mb-3">
-                                        <label class="form-label">Cantidad de Puntos a Usar</label>
-                                        <div class="input-group">
-                                            <input 
-                                                type="number" 
-                                                class="form-control" 
-                                                name="puntos_usar" 
-                                                id="puntos_usar"
-                                                min="0"
-                                                max="<?php echo $puntoss->total; ?>"
-                                                value="0"
-                                                onchange="calcularDescuentoModal()">
-                                            <button 
-                                                class="btn btn-outline-secondary" 
-                                                type="button" 
-                                                onclick="usarTodosPuntosModal()">
-                                                Usar Todos
-                                            </button>
+                                        <div class="form-check">
+                                            <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                id="usar_puntos"
+                                                name="usar_puntos"
+                                                value="1"
+                                                onchange="togglePuntos()">
+                                            <label class="form-check-label" for="usar_puntos">
+                                                Quiero usar mis puntos en esta compra
+                                            </label>
                                         </div>
-                                        <small class="text-muted">Máximo: <?php echo number_format($puntoss->total); ?> puntos</small>
                                     </div>
 
-                                    <div class="alert alert-success">
-                                        <strong>Descuento:</strong> 
-                                        <span id="descuento_puntos_modal">₲ 0</span>
+                                    <div id="seccion_puntos" style="display: none;">
+                                        <div class="mb-3">
+                                            <label class="form-label">Cantidad de Puntos a Usar</label>
+                                            <div class="input-group">
+                                                <input
+                                                    type="number"
+                                                    class="form-control"
+                                                    name="puntos_usar"
+                                                    id="puntos_usar"
+                                                    min="0"
+                                                    max="<?php echo $puntoss->total; ?>"
+                                                    value="0"
+                                                    onchange="calcularDescuentoModal()">
+                                                <button
+                                                    class="btn btn-outline-secondary"
+                                                    type="button"
+                                                    onclick="usarTodosPuntosModal()">
+                                                    Usar Todos
+                                                </button>
+                                            </div>
+                                            <small class="text-muted">Máximo: <?php echo number_format($puntoss->total); ?> puntos</small>
+                                        </div>
+
+                                        <div class="alert alert-success">
+                                            <strong>Descuento:</strong>
+                                            <span id="descuento_puntos_modal">₲ 0</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
                             <?php endif; ?>
                         </div>
 
@@ -524,7 +511,7 @@
                                 <h6 class="section-title">
                                     <i class="fas fa-shopping-bag"></i> Resumen de Productos
                                 </h6>
-                                
+
                                 <div class="table-responsive">
                                     <table class="table table-hover">
                                         <thead>
@@ -566,19 +553,6 @@
                                 </div>
 
                                 <!-- Términos y Condiciones -->
-                                <div class="mt-3">
-                                    <div class="form-check">
-                                        <input 
-                                            class="form-check-input" 
-                                            type="checkbox" 
-                                            id="acepto_terminos" 
-                                            name="acepto_terminos"
-                                            required>
-                                        <label class="form-check-label" for="acepto_terminos">
-                                            Acepto los términos y condiciones de compra
-                                        </label>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
@@ -597,81 +571,52 @@
     </div>
 </div>
 
-<style>
-.checkout-section {
-    background: #f8f9fa;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
 
-.section-title {
-    color: #333;
-    font-weight: 600;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #dee2e6;
-}
 
-.puntos-disponibles {
-    animation: fadeIn 0.3s ease-in;
-}
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-</style>
 
 
 <script>
-// Variables globales para el modal
-let subtotalOriginalModal = 0;
-let descuentoPuntosModal = 0;
-let maxPuntosDisponibles = <?php echo isset($puntoss->total) ? $puntoss->total : 0; ?>;
+    // Variables globales para el modal
+    let subtotalOriginalModal = 0;
+    let descuentoPuntosModal = 0;
+    let maxPuntosDisponibles = <?php echo isset($puntoss) ? $puntoss : 0; ?>;
 
-// Función que se llama desde el botón "Confirmar" en la tabla
-function confirmarVenta(idVenta) {
-    // Cargar datos de la venta
-    fetch(`index.php?c=venta&a=obtenerDetallesVenta&id=${idVenta}`)
-        .then(response => response.text())
-        .then(text => {
-            try {
-                const data = JSON.parse(text);
-                
-                // Guardar ID de venta
-                document.getElementById('id_venta').value = idVenta;
-                
-                // Cargar productos en la tabla
-                cargarProductosVenta(data);
-                
-                // Mostrar modal
-                const modal = new bootstrap.Modal(document.getElementById('modalConfirmarVenta'));
-                modal.show();
-                
-            } catch(e) {
-                console.error('Error parseando JSON:', text);
-                alert('Error al procesar los datos de la venta');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al cargar los detalles de la venta');
-        });
-}
+    // Función que se llama desde el botón "Confirmar" en la tabla
+    function confirmarVenta(idVenta) {
+        // Cargar datos de la venta
+        fetch(`index.php?c=venta&a=obtenerDetallesVenta&id=${idVenta}`)
+            .then(response => response.text())
+            .then(text => {
+                try {
+                    const data = JSON.parse(text);
+                    document.getElementById('id_venta').value = idVenta;
+                    cargarProductosVenta(data);
+                    const modal = new bootstrap.Modal(document.getElementById('modalConfirmarVenta'));
+                    modal.show();
+                } catch (e) {
+                    console.error('Error parseando JSON:', text);
+                    alert('Error al procesar los datos de la venta');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al cargar los detalles de la venta');
+            });
+    }
 
-// Cargar productos de la venta en el modal
-function cargarProductosVenta(productos) {
-    const tbody = document.getElementById('productos_confirmar');
-    tbody.innerHTML = '';
-    
-    let totalCalculado = 0;
-    
-    productos.forEach(item => {
-        const subtotalItem = parseFloat(item.total);
-        totalCalculado += subtotalItem;
-        
-        tbody.innerHTML += `
+    // Cargar productos de la venta en el modal
+    function cargarProductosVenta(productos) {
+        const tbody = document.getElementById('productos_confirmar');
+        tbody.innerHTML = '';
+
+        let totalCalculado = 0;
+
+        productos.forEach(item => {
+            const subtotalItem = parseFloat(item.total);
+            totalCalculado += subtotalItem;
+
+            tbody.innerHTML += `
             <tr>
                 <td>
                     <div class="d-flex align-items-center">
@@ -683,111 +628,156 @@ function cargarProductosVenta(productos) {
                 <td class="text-end">₲ ${formatearNumero(subtotalItem)}</td>
             </tr>
         `;
-    });
-    
-    subtotalOriginalModal = totalCalculado;
-    document.getElementById('subtotal_confirmar').textContent = '₲ ' + formatearNumero(subtotalOriginalModal);
-    document.getElementById('total_pagar_modal').textContent = '₲ ' + formatearNumero(subtotalOriginalModal);
-}
+        });
 
-// Toggle para mostrar/ocultar sección de puntos
-function togglePuntos() {
-    const checkbox = document.getElementById('usar_puntos');
-    const seccion = document.getElementById('seccion_puntos');
-    
-    if (checkbox.checked) {
-        seccion.style.display = 'block';
-    } else {
-        seccion.style.display = 'none';
-        document.getElementById('puntos_usar').value = 0;
+        subtotalOriginalModal = totalCalculado;
+        document.getElementById('subtotal_confirmar').textContent = '₲ ' + formatearNumero(subtotalOriginalModal);
+        document.getElementById('total_pagar_modal').textContent = '₲ ' + formatearNumero(subtotalOriginalModal);
+    }
+
+    // Toggle para mostrar/ocultar sección de puntos
+    function togglePuntos() {
+        const checkbox = document.getElementById('usar_puntos');
+        const seccion = document.getElementById('seccion_puntos');
+
+        if (checkbox.checked) {
+            seccion.style.display = 'block';
+        } else {
+            seccion.style.display = 'none';
+            document.getElementById('puntos_usar').value = 0;
+            calcularDescuentoModal();
+        }
+    }
+
+    // Usar todos los puntos disponibles
+    function usarTodosPuntosModal() {
+        const totalVenta = subtotalOriginalModal;
+        const maxDescuento = totalVenta / 100; // Máximo de puntos que se pueden usar
+        const puntosAUsar = Math.min(maxPuntosDisponibles, Math.floor(maxDescuento));
+
+        document.getElementById('puntos_usar').value = puntosAUsar;
         calcularDescuentoModal();
     }
-}
 
-// Usar todos los puntos disponibles
-function usarTodosPuntosModal() {
-    const totalVenta = subtotalOriginalModal;
-    const maxDescuento = totalVenta / 100; // Máximo de puntos que se pueden usar
-    const puntosAUsar = Math.min(maxPuntosDisponibles, Math.floor(maxDescuento));
-    
-    document.getElementById('puntos_usar').value = puntosAUsar;
-    calcularDescuentoModal();
-}
+    // Calcular descuento por puntos
+    function calcularDescuentoModal() {
+        const puntosUsar = parseInt(document.getElementById('puntos_usar').value) || 0;
 
-// Calcular descuento por puntos
-function calcularDescuentoModal() {
-    const puntosUsar = parseInt(document.getElementById('puntos_usar').value) || 0;
-    
-    // Validar que no exceda el total
-    const maxDescuento = subtotalOriginalModal / 100;
-    const puntosMaximos = Math.min(puntosUsar, Math.floor(maxDescuento), maxPuntosDisponibles);
-    
-    if (puntosUsar > puntosMaximos) {
-        document.getElementById('puntos_usar').value = puntosMaximos;
-        alert(`Solo puedes usar máximo ${puntosMaximos} puntos en esta compra`);
-        return;
-    }
-    
-    descuentoPuntosModal = puntosUsar * 100; // 1 punto = ₲100
-    
-    // Actualizar visualización del descuento
-    document.getElementById('descuento_puntos_modal').textContent = '₲ ' + formatearNumero(descuentoPuntosModal);
-    document.getElementById('descuento_total_modal').textContent = '- ₲ ' + formatearNumero(descuentoPuntosModal);
-    
-    // Mostrar/ocultar fila de descuento
-    const filaDescuento = document.getElementById('fila_descuento_modal');
-    if (descuentoPuntosModal > 0) {
-        filaDescuento.style.display = 'table-row';
-    } else {
-        filaDescuento.style.display = 'none';
-    }
-    
-    // Calcular total final
-    const totalFinal = Math.max(0, subtotalOriginalModal - descuentoPuntosModal);
-    document.getElementById('total_pagar_modal').textContent = '₲ ' + formatearNumero(totalFinal);
-}
+        // Validar que no exceda el total
+        const maxDescuento = subtotalOriginalModal / 100;
+        const puntosMaximos = Math.min(puntosUsar, Math.floor(maxDescuento), maxPuntosDisponibles);
 
-// Procesar confirmación de venta
-function procesarConfirmacionVenta() {
-    const form = document.getElementById('formConfirmarVenta');
-    
-    // Validar formulario
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
+        if (puntosUsar > puntosMaximos) {
+            document.getElementById('puntos_usar').value = puntosMaximos;
+            alert(`Solo puedes usar máximo ${puntosMaximos} puntos en esta compra`);
+            return;
+        }
+
+        descuentoPuntosModal = puntosUsar * 100; // 1 punto = ₲100
+
+        // Actualizar visualización del descuento
+        document.getElementById('descuento_puntos_modal').textContent = '₲ ' + formatearNumero(descuentoPuntosModal);
+        document.getElementById('descuento_total_modal').textContent = '- ₲ ' + formatearNumero(descuentoPuntosModal);
+
+        // Mostrar/ocultar fila de descuento
+        const filaDescuento = document.getElementById('fila_descuento_modal');
+        if (descuentoPuntosModal > 0) {
+            filaDescuento.style.display = 'table-row';
+        } else {
+            filaDescuento.style.display = 'none';
+        }
+
+        // Calcular total final
+        const totalFinal = Math.max(0, subtotalOriginalModal - descuentoPuntosModal);
+        document.getElementById('total_pagar_modal').textContent = '₲ ' + formatearNumero(totalFinal);
     }
-    
-    // Recopilar datos del formulario
-    const formData = new FormData(form);
-    formData.append('total_final', subtotalOriginalModal - descuentoPuntosModal);
-    formData.append('descuento_puntos', descuentoPuntosModal);
-    
-    // Confirmar antes de procesar
-    if (confirm('¿Confirmar venta por ₲ ' + formatearNumero(subtotalOriginalModal - descuentoPuntosModal) + '?')) {
-        // Enviar datos al servidor
-        fetch('index.php?c=venta&a=confirmar', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('¡Venta confirmada exitosamente!');
-                location.reload();
-            } else {
-                alert('Error: ' + (data.message || 'No se pudo confirmar la venta'));
+    // Asegúrate de que SweetAlert2 esté incluido en tu proyecto para que esto funcione
+
+    // Procesar confirmación de venta
+    function procesarConfirmacionVenta() {
+        const form = document.getElementById('formConfirmarVenta');
+        const totalFinal = subtotalOriginalModal - descuentoPuntosModal;
+        const urlFactura = 'index.php?c=factura&a=imprimir&id_venta='; // Define tu URL base para la factura/ticket
+
+        // Validar formulario (la validación nativa funciona con checkValidity())
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // Recopilar datos del formulario
+        const formData = new FormData(form);
+        formData.append('total_final', totalFinal);
+        formData.append('descuento_puntos', descuentoPuntosModal);
+
+        // 1. Reemplazar 'confirm' rústico por un SweetAlert de confirmación
+        Swal.fire({
+            title: '¿Confirmar la Venta?',
+            text: 'El total a pagar es: ₲ ' + formatearNumero(totalFinal),
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, ¡Confirmar!',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // El usuario confirmó, enviamos los datos al servidor
+                fetch('index.php?c=venta&a=cerrarVenta', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // 2. ¡EL CAMBIO CLAVE! SweetAlert de Éxito con opción de impresión
+                            Swal.fire({
+                                title: '🎉 ¡Compra Exitosa!',
+                                html: `
+                            Felicidades, tu compra se ha confirmado.
+                            <br>
+                            Se ha enviado un correo con el detalle de tu factura y seguimiento.
+                        `,
+                                icon: 'success',
+                                showCancelButton: true,
+                                confirmButtonColor: '#3085d6',
+                                cancelButtonColor: '#aaa',
+                                confirmButtonText: 'Imprimir Factura/Ticket',
+                                cancelButtonText: 'Cerrar'
+                            }).then((printResult) => {
+                                // Si el usuario elige imprimir
+                                if (printResult.isConfirmed) {
+                                    // Abre una nueva ventana/pestaña para la impresión
+                                    window.open(urlFactura + data.id_venta, '_blank');
+                                }
+                                // Recargar la página (o redirigir, según tu flujo de eCommerce)
+                                location.href = 'index.php?c=cliente'; // Redirige a la página de pedidos o perfil
+                            });
+
+                        } else {
+                            // SweetAlert de Error
+                            Swal.fire(
+                                'Error',
+                                data.message || 'No se pudo confirmar la venta. Inténtalo de nuevo.',
+                                'error'
+                            );
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire(
+                            'Error de Conexión',
+                            'Ocurrió un error al procesar la confirmación. Revisa tu conexión.',
+                            'error'
+                        );
+                    });
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al procesar la confirmación');
         });
     }
-}
 
-// Función auxiliar para formatear números
-function formatearNumero(numero) {
-    return Math.round(numero).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
+    // Función auxiliar para formatear números
+    function formatearNumero(numero) {
+        return Math.round(numero).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
 </script>
 <?php include('view/crudModal.php'); ?>

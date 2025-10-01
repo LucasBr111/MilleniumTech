@@ -48,6 +48,12 @@ class productosController
        
     }
 
+    public function perifericos(){
+        require_once 'view/header.php';
+        require_once './view/productos/productos-perifericos.php';
+        require_once 'view/footer.php';
+    }
+
     public function ofertas(){
         $filtro = $_REQUEST['filtro'] ?? null;
         $terminoBusqueda = $_REQUEST['query'] ?? null;
@@ -72,6 +78,17 @@ class productosController
         $productos = $this->model->ListarOfertas($filtro, $terminoBusqueda);
 
         include './view/productos/listado-productos.php';
+    }
+
+    public function detalles(){
+        $id = $_REQUEST['id_producto'];
+        $producto = $this->model->Obtener($id);
+        $imagenes_galeria = $this->model->ListarImagenesGaleria($id);
+
+        require_once 'view/header.php';
+        require_once './view/productos/productos-detalles.php';
+        require_once 'view/footer.php';
+
     }
 
 

@@ -28,10 +28,10 @@
                     <div class="hero-content">
                         <h1 class="hero-title">Gaming Revolution</h1>
                         <p class="hero-description">Descubre la última tecnología gaming con equipos de alto rendimiento que llevarán tu experiencia al siguiente nivel. Componentes premium para gamers exigentes.</p>
-                        <a href="#featured-products" class="hero-cta">
+         <!--                <a href="#featured-products" class="hero-cta">
                             <i class="fas fa-gamepad"></i>
                             Explorar Gaming
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             </div>
@@ -42,10 +42,10 @@
                     <div class="hero-content">
                         <h1 class="hero-title">Periféricos Pro</h1>
                         <p class="hero-description">Teclados mecánicos, ratones gaming y auriculares de última generación. Precisión y comodidad para dominar cualquier partida con estilo profesional.</p>
-                        <a href="#categories" class="hero-cta">
+                        <!-- <a href="?c=productos&a=perifericos" class="hero-cta">
                             <i class="fas fa-mouse"></i>
                             Ver Periféricos
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             </div>
@@ -56,10 +56,10 @@
                     <div class="hero-content">
                         <h1 class="hero-title">Streaming Pro</h1>
                         <p class="hero-description">Todo lo que necesitas para crear el setup de streaming perfecto. Cámaras, micrófonos, iluminación y software para compartir tu pasión con el mundo.</p>
-                        <a href="#new-arrivals" class="hero-cta">
+                        <!-- <a href="#new-arrivals" class="hero-cta">
                             <i class="fas fa-video"></i>
                             Setup Streaming
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             </div>
@@ -70,10 +70,10 @@
                     <div class="hero-content">
                         <h1 class="hero-title">Visual Experience</h1>
                         <p class="hero-description">Monitores gaming 4K con frecuencias de actualización ultrarrápidas. Experimenta cada detalle con claridad cristalina y colores vibrantes.</p>
-                        <a href="#featured-products" class="hero-cta">
+                       <!--  <a href="#featured-products" class="hero-cta">
                             <i class="fas fa-desktop"></i>
                             Ver Monitores
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             </div>
@@ -84,10 +84,10 @@
                     <div class="hero-content">
                         <h1 class="hero-title">Million Tech Store</h1>
                         <p class="hero-description">Tu tienda especializada en gaming y tecnología. Calidad garantizada, precios competitivos, envío rápido y la mejor atención al cliente del país.</p>
-                        <a href="#about-us" class="hero-cta">
+                        <!-- <a href="#about-us" class="hero-cta">
                             <i class="fas fa-star"></i>
                             Conocer Más
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             </div>
@@ -108,7 +108,7 @@
         <div class="promo-content">
             <h3 class="promo-title">🔥 OFERTAS ESPECIALES 🔥</h3>
             <p class="promo-text">Descuentos de hasta 30% en productos seleccionados. ¡Por tiempo limitado!</p>
-            <button class="promo-btn">Ver Ofertas</button>
+            <a href="?c=productos&a=ofertas" class="promo-btn">Ver Ofertas</a>
         </div>
     </section>
 
@@ -133,9 +133,13 @@
                             <h5 class="product-title"><?= htmlspecialchars($producto->nombre_producto) ?></h5>
                             <p class="product-price">Gs. <?= number_format($producto->precio, 0, ',', '.') ?></p>
                             <div class="product-actions">
-                                <button class="btn btn-primary-custom btn-add-cart" data-id="<?= $producto->id_producto ?>" <?= ($producto->stock <= 0) ? 'disabled' : '' ?>>
+                                <!-- <button class="btn btn-primary-custom btn-add-cart" data-id="<?= $producto->id_producto ?>" <?= ($producto->stock <= 0) ? 'disabled' : '' ?>>
                                     <i class="fas fa-shopping-cart me-2"></i>Añadir al Carrito
-                                </button>
+                                </button> -->
+                                <!-- ver detalles -->
+                                <a class="btn btn-primary-custom btn-view-details" data-id="<?= $producto->id_producto ?>" href='index.php?c=productos&a=detalles&id_producto=<?= $producto->id_producto ?>'">
+                                    <i class="fas fa-info-circle me-2"></i>Ver Detalles
+                                </a>
                                 <button class="btn btn-favorite btn-fav <?= (isset($producto->es_favorito) && $producto->es_favorito) ? 'active' : '' ?>" data-id="<?= $producto->id_producto ?>">
                                     <i class="<?= (isset($producto->es_favorito) && $producto->es_favorito) ? 'fas text-danger' : 'far' ?> fa-heart"></i>
                                 </button>
@@ -198,18 +202,18 @@
     </section>
 
     <!-- Featured Banner -->
-    <div class="featured-banner">
+  <!--   <div class="featured-banner">
         <h3 class="orbitron" style="font-size: 2.5rem; color: var(--primary-gold); margin-bottom: 1rem; position: relative; z-index: 1;">
             🏆 Setup Gaming Profesional
         </h3>
         <p style="font-size: 1.2rem; color: var(--text-secondary); position: relative; z-index: 1; margin-bottom: 2rem;">
-            Lleva tu experiencia gaming al próximo nivel con nuestros equipos profesionales y accesorios de alta gama
+            Consulta con nuestra inteligencia artificial para armar tu experiencia gaming al próximo nivel con nuestros equipos profesionales y accesorios de alta gama
         </p>
         <button class="hero-cta" style="position: relative; z-index: 1;">
             <i class="fas fa-trophy me-2"></i>
             Ver Setup Completo
         </button>
-    </div>
+    </div> -->
 
     <!-- Best Products Section -->
     <section id="best-products" class="py-5">
@@ -238,9 +242,12 @@
                                         <i class="fas fa-edit"></i>
                                     </button>
                                 <?php endif; ?>
-                                <button class="btn btn-primary-custom btn-add-cart" data-id="<?= $producto->id_producto ?>" <?= ($producto->stock <= 0) ? 'disabled' : '' ?>>
+<!--                                 <button class="btn btn-primary-custom btn-add-cart" data-id="<?= $producto->id_producto ?>" <?= ($producto->stock <= 0) ? 'disabled' : '' ?>>
                                     <i class="fas fa-shopping-cart me-2"></i>Añadir al Carrito
-                                </button>
+                                </button> -->
+                                <a class="btn btn-secondary btn-view-details" data-id="<?= $producto->id_producto ?>" href='index.php?c=productos&a=detalles&id_producto=<?= $producto->id_producto ?>'">
+                                    <i class="fas fa-info-circle me-2"></i>Ver Detalles
+                                </a>
                                 <button class="btn btn-favorite btn-fav <?= (isset($producto->es_favorito) && $producto->es_favorito) ? 'active' : '' ?>" data-id="<?= $producto->id_producto ?>">
                                     <i class="<?= (isset($producto->es_favorito) && $producto->es_favorito) ? 'fas text-danger' : 'far' ?> fa-heart"></i>
                                 </button>
@@ -279,9 +286,9 @@
     <!-- Promotional Banner 2 -->
     <section class="promo-banner" style="background: var(--gradient-secondary);">
         <div class="promo-content">
-            <h3 class="promo-title">💻 NUEVOS ARRIVALS 💻</h3>
+            <h3 class="promo-title">💻 NOVEDADES 💻</h3>
             <p class="promo-text">Las últimas tecnologías en gaming ya están aquí. Sé el primero en probarlas.</p>
-            <button class="promo-btn">Ver Novedades</button>
+            <a class="promo-btn" href="?c=productos&a=novedades">Ver Novedades</a>
         </div>
     </section>
 
