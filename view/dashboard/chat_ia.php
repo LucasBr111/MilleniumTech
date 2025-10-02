@@ -146,7 +146,9 @@
     const sendButton = document.getElementById('sendButton');
     const debugPanel = document.getElementById('debugPanel');
 
-    // Sistema de debug
+    // =========================================================================
+    // DEBUG LOGIC
+    // =========================================================================
     function debugLog(message, type = 'info') {
         const timestamp = new Date().toLocaleTimeString();
         const color = {
@@ -165,13 +167,15 @@
         debugPanel.classList.toggle('hidden');
     }
 
-    debugLog('Sistema de chat inicializado', 'success');
-
+    // =========================================================================
+    // CHAT MESSAGE RENDERING
+    // =========================================================================
     function addMessage(role, content) {
         debugLog(`Añadiendo mensaje: ${role}`, 'info');
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${role}`;
         
+        // El contenido puede ser HTML (tablas/gráficos) o texto simple
         if (role === 'gemini') {
             msgDiv.innerHTML = `<i class="fas fa-robot"></i> ${content}`;
         } else {
@@ -183,6 +187,9 @@
         debugLog(`Mensaje añadido correctamente`, 'success');
     }
 
+    // =========================================================================
+    // TABLE RENDERING
+    // =========================================================================
     function generateTableHtml(data) {
         debugLog('Generando tabla HTML', 'info');
         
@@ -200,7 +207,9 @@
         // Encabezados
         html += '<thead class="table-primary"><tr>';
         headers.forEach(h => {
-            html += `<th>${h.replace(/_/g, ' ')}</th>`;
+            // Convierte 'nombre_columna' a 'Nombre Columna'
+            const formattedHeader = h.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            html += `<th>${formattedHeader}</th>`;
         });
         html += '</tr></thead><tbody>';
 
@@ -218,69 +227,103 @@
         return html;
     }
     
-    function generateChartHtml(data) {
-        debugLog('Generando gráfico', 'info');
-        
+    // =========================================================================
+    // CHART RENDERING (UPDATED)
+    // =========================================================================
+    function generateChartHtml(data, type = 'bar') {
+        debugLog(`Generando gráfico tipo: ${type}`, 'info');
+
         if (!data || data.length === 0 || data[0].error) {
             const errorMsg = data[0]?.error || 'No hay suficientes datos para generar el gráfico.';
             debugLog(`Error en datos de gráfico: ${errorMsg}`, 'error');
-            return `<div class="alert alert-warning mt-2"><i class="fas fa-exclamation-triangle"></i> ${errorMsg}</div>`;
+            // Devolvemos el error en un div para que pueda ser incrustado en el mensaje
+            return `<div class="alert alert-warning mt-2"><i class="fas fa-exclamation-triangle"></i> ${errorMsg}</div>`; 
         }
         
         const keys = Object.keys(data[0]);
-        debugLog(`Gráfico con columnas: ${keys.join(', ')}`, 'info');
         
+        if (keys.length < 2) {
+             debugLog('ERROR: La consulta de gráfico debe devolver al menos 2 columnas.', 'error');
+             return `<div class="alert alert-warning mt-2"><i class="fas fa-exclamation-triangle"></i> El formato de datos del gráfico es incorrecto (Se esperaban 'label' y 'value').</div>`;
+        }
+
         const labels = data.map(row => row[keys[0]]);
         const values = data.map(row => parseFloat(row[keys[1]]) || 0);
         const datasetLabel = keys[1].replace(/_/g, ' ');
 
         const chartId = 'chartCanvas_' + Date.now();
+        const icon = (type.toLowerCase() === 'line' || type.toLowerCase() === 'area') ? 'fas fa-chart-line' : (type.toLowerCase() === 'pie' || type.toLowerCase() === 'doughnut' ? 'fas fa-chart-pie' : 'fas fa-chart-bar');
+        
         const html = `
             <div id="chartContainer" class="card p-3 shadow-sm">
-                <h6><i class="fas fa-chart-bar"></i> Gráfico: ${datasetLabel} por ${keys[0].replace(/_/g, ' ')}</h6>
+                <h6><i class="${icon}"></i> Visualización de Datos: ${datasetLabel} por ${keys[0].replace(/_/g, ' ')}</h6>
                 <canvas id="${chartId}"></canvas>
             </div>
         `;
+
+        // Agregamos el mensaje que contendrá el canvas al chat
+        // NOTA: Para gráficos, NO devolvemos el HTML, sino que lo agregamos directamente al chat 
+        addMessage('gemini', html); 
         
-        addMessage('gemini', html);
-        
+        // Pequeño timeout para asegurar que el canvas se ha renderizado en el DOM
         setTimeout(() => {
-            debugLog('Dibujando gráfico con Chart.js', 'info');
+            debugLog(`Dibujando gráfico de ${type} con Chart.js`, 'info');
             const ctx = document.getElementById(chartId);
             
             if (!ctx) {
-                debugLog('ERROR: No se encontró el canvas', 'error');
+                debugLog('ERROR: No se encontró el canvas para dibujar', 'error');
                 return;
             }
             
-            new Chart(ctx.getContext('2d'), {
-                type: 'bar',
+            // Lógica para manejar colores y tipos de gráfico
+            const chartType = type.toLowerCase();
+            const isPieOrDoughnut = ['pie', 'doughnut'].includes(chartType);
+            const primaryColor = 'rgba(0, 123, 255, 0.8)';
+            const colors = isPieOrDoughnut 
+                ? labels.map((_, i) => `hsl(${(i * 360 / labels.length) % 360}, 70%, 50%)`) 
+                : primaryColor;
+
+            const chartConfig = {
+                type: isPieOrDoughnut ? chartType : (chartType === 'area' ? 'line' : chartType),
                 data: {
                     labels: labels,
                     datasets: [{
                         label: datasetLabel,
                         data: values,
-                        backgroundColor: 'rgba(0, 123, 255, 0.6)',
-                        borderColor: 'rgba(0, 123, 255, 1)',
-                        borderWidth: 1
+                        backgroundColor: colors,
+                        borderColor: isPieOrDoughnut ? 'white' : 'rgba(0, 123, 255, 1)',
+                        borderWidth: isPieOrDoughnut ? 2 : 1,
+                        fill: chartType === 'area' ? 'origin' : false, // Usar 'origin' para gráficos de área
+                        tension: ['line', 'area'].includes(chartType) ? 0.3 : 0 // Para gráficos de línea/área
                     }]
                 },
                 options: {
                     responsive: true,
-                    scales: {
+                    // Deshabilitar ejes para Pie/Doughnut
+                    scales: isPieOrDoughnut ? { x: { display: false }, y: { display: false } } : {
                         y: {
                             beginAtZero: true
                         }
+                    },
+                    plugins: {
+                        legend: {
+                            display: !isPieOrDoughnut, // Mostrar leyenda en Pie/Doughnut
+                            position: 'top',
+                        }
                     }
                 }
-            });
+            };
+
+            new Chart(ctx.getContext('2d'), chartConfig);
             debugLog('Gráfico dibujado exitosamente', 'success');
         }, 100);
         
-        return null; // No devolver nada porque ya se añadió el mensaje
+        return null; // Devuelve null porque el mensaje ya se añadió
     }
 
-    // Manejador del formulario
+    // =========================================================================
+    // FORM SUBMISSION AND AJAX LOGIC (UPDATED)
+    // =========================================================================
     chatForm.addEventListener('submit', function(e) {
         e.preventDefault();
         debugLog('=== NUEVA CONSULTA ===', 'info');
@@ -322,35 +365,82 @@
                 debugLog(`Tipo de respuesta: ${response.type}`, 'info');
                 
                 loaderElement.remove();
-                
-                let geminiResponseHtml = '';
-                const rawContent = response.content;
 
-                if (response.type === 'sql_result') {
-                    debugLog('Procesando resultados SQL', 'info');
-                    geminiResponseHtml = '¡Consulta exitosa! Aquí están los resultados de la base de datos:';
-                    geminiResponseHtml += generateTableHtml(rawContent);
-                    addMessage('gemini', geminiResponseHtml);
-                    
-                } else if (response.type === 'graph') {
-                    debugLog('Procesando gráfico', 'info');
-                    generateChartHtml(rawContent);
-                    
-                } else if (response.type === 'error') {
+                // Función auxiliar para procesar un solo componente (SQL, TEXT, GRAPH)
+                function processComponent(component) {
+                    let componentHtml = '';
+                    const rawContent = component.content;
+
+                    if (component.type === 'sql_result') {
+                        debugLog('Procesando componente SQL', 'info');
+                        componentHtml += `<h6 class="mt-3 mb-2 text-primary"><i class="fas fa-database"></i> Resultados de Consulta</h6>`;
+                        componentHtml += generateTableHtml(rawContent);
+                        return componentHtml;
+
+                    } else if (component.type === 'graph') {
+                        debugLog('Procesando componente Gráfico', 'info');
+                        // La función de gráfico añade el mensaje directamente
+                        const errorContent = generateChartHtml(rawContent, component.graph_type); 
+                        return errorContent || ''; // Retorna error si falla el formato, si no, vacío
+
+                    } else if (component.type === 'text') {
+                        debugLog('Procesando componente Texto', 'info');
+                        // Incluye un encabezado si es parte de una respuesta combinada
+                        const isCombined = response.type === 'combined';
+                        let textContent = isCombined ? `<div class="mt-3 pt-3 border-top"><i class="fas fa-comments text-primary"></i> <strong>Análisis:</strong> ${rawContent.replace(/\n/g, '<br>')}</div>` : rawContent.replace(/\n/g, '<br>');
+                        return textContent;
+                    }
+                    return '';
+                }
+
+                if (response.type === 'error') {
+                    const rawContent = response.content;
                     debugLog(`Error recibido: ${rawContent}`, 'error');
-                    geminiResponseHtml = `<div class="alert alert-danger mt-2"><i class="fas fa-exclamation-triangle"></i> ${rawContent}</div>`;
-                    addMessage('gemini', geminiResponseHtml);
+                    const errorHtml = `<div class="alert alert-danger mt-2"><i class="fas fa-exclamation-triangle"></i> ${rawContent}</div>`;
+                    addMessage('gemini', errorHtml);
+                } else if (response.type === 'combined') {
+                    debugLog('Procesando respuesta COMBINADA', 'info');
+                    let combinedHtml = '';
                     
-                } else { // type: 'text'
-                    debugLog('Procesando respuesta de texto', 'info');
-                    geminiResponseHtml = rawContent.replace(/\n/g, '<br>');
-                    addMessage('gemini', geminiResponseHtml);
+                    response.components.forEach(component => {
+                        const htmlPart = processComponent(component);
+                        if (htmlPart) {
+                            combinedHtml += htmlPart;
+                        }
+                    });
+                    
+                    // Si generó HTML (tablas/texto), lo mostramos. Los gráficos se añaden solos.
+                    if (combinedHtml) {
+                        // Si hay solo un componente de texto, no lo encerramos en otro div
+                        const textOnly = response.components.every(c => c.type === 'text');
+                        addMessage('gemini', combinedHtml);
+                    }
+                } else { // type: 'sql_result', 'graph', 'text' (simples)
+                    let simpleHtml = '';
+                    if (response.type === 'sql_result') {
+                        simpleHtml += '¡Consulta exitosa! Aquí están los resultados de la base de datos:';
+                    }
+                    
+                    simpleHtml += processComponent(response);
+                    
+                    if (simpleHtml) {
+                       addMessage('gemini', simpleHtml);
+                    }
                 }
 
                 // Actualizar historial
                 if (response.type !== 'error') {
                     chatHistory.push({ role: 'user', text: pregunta });
-                    const modelContent = (response.type === 'text') ? rawContent : `[Respuesta: ${response.type}]`;
+                    
+                    let modelContent;
+                    if (response.type === 'text') {
+                        modelContent = response.content;
+                    } else if (response.type === 'combined') {
+                        modelContent = `[Respuesta combinada: ${response.components.map(c => c.type).join(' + ')}]`;
+                    } else {
+                        // Para SQL y GRAPH, solo guardamos el tipo
+                        modelContent = `[Respuesta: ${response.type}]`;
+                    }
                     chatHistory.push({ role: 'model', text: modelContent });
                     debugLog(`Historial actualizado: ${chatHistory.length} mensajes`, 'info');
                 }
@@ -367,8 +457,7 @@
                     <strong>Error de comunicación con el servidor</strong><br>
                     Estado: ${status}<br>
                     Código HTTP: ${xhr.status}<br>
-                    Mensaje: ${error}<br>
-                    <small>Revisa la consola del navegador (F12) y los logs del servidor PHP para más detalles.</small>
+                    <small>Revisa la consola (F12) y los logs PHP.</small>
                 </div>`;
                 
                 addMessage('gemini', errorMessage);
@@ -384,6 +473,5 @@
 
     // Inicialización
     debugLog('Chat listo para usar', 'success');
-    debugLog('URL del controlador: ?c=chat_ia&a=consultarGeminiSimple', 'info');
 </script>
 
