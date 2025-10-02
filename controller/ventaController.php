@@ -167,6 +167,7 @@ class ventaController
         $metodo_pago = $_POST['metodo_pago'] ?? 'Transferencia';
         $direccion_envio = $_POST['direccion_envio'] ?? '';
         $descuento = $_POST['descuento_puntos'] ?? 0;
+        $id_cliente = $this->model->obtenerClientePorVenta($id_venta)->id;
         try {
 
             $this->model->cerrarVenta($id_venta, $direccion_envio, $metodo_pago, $descuento);
@@ -185,7 +186,6 @@ class ventaController
             if ($descuento > 0) {
                 $puntos_a_restar = $descuento / 100; // 1 punto equivale a 100Gs
                 // Restar puntos
-                $id_cliente = $this->model->obtenerClientePorVenta($id_venta)->id;
                 $this->cliente->restarPuntos($id_cliente, $puntos_a_restar);
             }
 
@@ -196,7 +196,7 @@ class ventaController
             }
 
             header('Content-Type: application/json');
-            echo json_encode(['success' => true, 'message' => 'Venta cerrada exitosamente', 'id_venta' => $id_venta]);
+            echo json_encode(['success' => true, 'message' => 'Venta cerrada exitosamente', 'id_venta' => $id_venta, 'id_cliente' => $id_cliente]);
         } catch (\Exception $e) {
 
             header('Content-Type: application/json');

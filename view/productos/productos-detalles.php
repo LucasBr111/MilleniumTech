@@ -168,6 +168,21 @@ function increaseQuantity() {
     }
 }
 function addToCart(productId) {
+    var isLoggedIn = <?= isset($_SESSION['isLoggedIn']) && $_SESSION['isLoggedIn'] ? 'true' : 'false' ?>;
+
+    if (!isLoggedIn) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Debes iniciar sesión',
+            text: 'Para añadir productos a favoritos necesitas iniciar sesión.',
+            confirmButtonText: 'Ir al login'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "index.php?c=login";
+            }
+        });
+        return;
+    }
     // 1. Obtener la cantidad
     const quantity = parseInt(document.getElementById('product-quantity').value);
 

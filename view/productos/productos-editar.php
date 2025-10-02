@@ -8,7 +8,7 @@
             <label class="form-label fw-bold">Imagen de Portada</label>
             <div class="mb-3">
                 <img id="previewImagen"
-                    src="<?php echo !empty($producto->imagen_portada) ? 'assets/uploads/productos/' . $producto->imagen_portada : 'assets/img/no-image.png'; ?>"
+                    src="assets/uploads/productos/<?php echo !empty($producto->imagen_portada) ? 'assets/uploads/productos/' . $producto->imagen_portada : 'assets/img/no-image.png'; ?>"
                     alt="Imagen de portada"
                     class="img-thumbnail mb-2"
                     style="max-height: 200px;">
@@ -18,7 +18,7 @@
             <input type="hidden" name="imagen_portada_actual" value="<?php echo $producto->imagen_portada; ?>">
         </div>
 
-        <div class="col-md-8">
+        <!-- <div class="col-md-8">
             <label class="form-label fw-bold">Galería de Imágenes</label>
             <div class="mb-3">
                 <input class="form-control" type="file" name="imagenes_galeria[]" multiple accept="image/*">
@@ -33,7 +33,7 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
-        </div>
+        </div> -->
         <!-- Datos del producto -->
         <div class="col-md-8">
             <div class="card p-3 shadow-sm">
@@ -83,16 +83,22 @@
             <div class="card p-3 shadow-sm mt-3">
                 <h5 class="card-title"><i class="fa-solid fa-calendar-days"></i> Promoción</h5>
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Desde</label>
                         <input type="date" class="form-control" name="promo_desde"
                             value="<?php echo isset($producto->promo_desde) ? $producto->promo_desde : ''; ?>">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Hasta</label>
                         <input type="date" class="form-control" name="promo_hasta"
                             value="<?php echo isset($producto->promo_hasta) ? $producto->promo_hasta : ''; ?>">
                     </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label"><i class="fa-solid fa-dollar-sign"></i> Precio promo</label>
+                    <input type="number" step="0.01" class="form-control" name="precio?promo"
+                        value="<?php echo isset($producto->precio_promo) ? $producto->precio_promo : ''; ?>"
+                        required>
                 </div>
             </div>
 

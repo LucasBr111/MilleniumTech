@@ -125,6 +125,7 @@ class productosController
         $producto->id_categoria = $_REQUEST['id_categoria'];
         $producto->marca = $_REQUEST['marca'];
         $producto->destacado = isset($_REQUEST['destacado']) ? 1 : 0;
+        $precio_promo = $_REQUEST['precio_promo'];
         $producto->promo_desde = $_REQUEST['promo_desde'];
         $producto->promo_hasta = $_REQUEST['promo_hasta'];
 
@@ -188,7 +189,7 @@ class productosController
             // redirigir al index
            
         }  
-        header('Location: index.php?c=home');         
+        header('Location: index.php?c=dashboard&a=productos');         
     }
 
     public function addfavorito() {

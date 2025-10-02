@@ -321,7 +321,18 @@ class venta
     }
 }
 
+public function contarPendientes()
+{
+    try {
+        $stm = $this->pdo->query("SELECT COUNT(*) as total_pendientes FROM ventas WHERE estado_pago = 'pendiente'");
+        $result = $stm->fetch(PDO::FETCH_OBJ);
+        return (int)$result->total_pendientes;
+    } catch (Exception $e) {
+        die($e->getMessage());
+    }
+
     
+}
 
    
 }

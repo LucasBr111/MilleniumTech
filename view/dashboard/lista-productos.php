@@ -33,8 +33,7 @@ function estaEnPromocion($promo_desde, $promo_hasta, $fecha_actual) {
             <button class="btn btn-primary admin-btn" 
                     data-bs-toggle="modal" 
                     data-bs-target="#crudModal" 
-                    data-c="producto" 
-                    data-a="crear" 
+                    data-c="productos" 
                     title="Añadir Nuevo Producto">
                 <i class="fas fa-plus me-2"></i> Añadir Producto
             </button>

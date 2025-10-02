@@ -6,16 +6,51 @@
 class NumeroALetras
 {
     private static $UNIDADES = [
-        '', 'un ', 'dos ', 'tres ', 'cuatro ', 'cinco ', 'seis ', 'siete ', 'ocho ', 'nueve ', 'diez ',
-        'once ', 'doce ', 'trece ', 'catorce ', 'quince ', 'dieciseis ', 'diecisiete ', 'dieciocho ', 'diecinueve ', 'veinte '
+        '',
+        'un ',
+        'dos ',
+        'tres ',
+        'cuatro ',
+        'cinco ',
+        'seis ',
+        'siete ',
+        'ocho ',
+        'nueve ',
+        'diez ',
+        'once ',
+        'doce ',
+        'trece ',
+        'catorce ',
+        'quince ',
+        'dieciseis ',
+        'diecisiete ',
+        'dieciocho ',
+        'diecinueve ',
+        'veinte '
     ];
 
     private static $DECENAS = [
-        'veinti', 'treinta ', 'cuarenta ', 'cincuenta ', 'sesenta ', 'setenta ', 'ochenta ', 'noventa ', 'cien '
+        'veinti',
+        'treinta ',
+        'cuarenta ',
+        'cincuenta ',
+        'sesenta ',
+        'setenta ',
+        'ochenta ',
+        'noventa ',
+        'cien '
     ];
 
     private static $CENTENAS = [
-        'ciento ', 'doscientos ', 'trescientos ', 'cuatrocientos ', 'quinientos ', 'seiscientos ', 'setecientos ', 'ochocientos ', 'novecientos '
+        'ciento ',
+        'doscientos ',
+        'trescientos ',
+        'cuatrocientos ',
+        'quinientos ',
+        'seiscientos ',
+        'setecientos ',
+        'ochocientos ',
+        'novecientos '
     ];
 
     public static function convertir($number, $moneda = '', $centimos = '', $forzarCentimos = false)
@@ -68,7 +103,7 @@ class NumeroALetras
         if (!empty($moneda) && $number >= 0) {
             $valor_convertido .= ' ' . $moneda;
         }
-        
+
         return strtoupper($valor_convertido);
     }
 
@@ -97,417 +132,649 @@ class NumeroALetras
         return $output;
     }
 }
+?>
 
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-// ==========================================================
-// INCLUSIÓN DE LIBRERÍAS
-// ==========================================================
-require_once('plugins/tcpdf2/tcpdf.php'); 
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
 
+        .factura-container {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+            padding: 0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
 
-// ==========================================================
-// 1. CONFIGURACIÓN DEL TIMBRADO Y DATOS DINÁMICOS (SU CÓDIGO ORIGINAL)
-// ==========================================================
+        /* Borde exterior de toda la factura */
+        .factura-borde {
+            border: 3px solid #000;
+            padding: 8px;
+        }
 
-// Fecha de inicio de vigencia: Hoy (o la fecha de emisión de la factura)
-$fecha_emision = date('Y-m-d'); 
-$fecha_inicio_vigencia = $fecha_emision;
+        /* ENCABEZADO SUPERIOR */
+        .encabezado-principal {
+            display: grid;
+            grid-template-columns: 35% 40% 25%;
+            border: 2px solid #000;
+            min-height: 100px;
+        }
 
-// Fecha de fin de vigencia: Un mes después (el último día del mes siguiente)
-$fecha_fin_vigencia_obj = new DateTime($fecha_inicio_vigencia);
-// Ajustamos para que termine, por ejemplo, el 30/10 si empieza el 30/09
-$fecha_fin_vigencia_obj->modify('+1 month -1 day'); 
-$fecha_fin_vigencia = $fecha_fin_vigencia_obj->format('Y-m-d');
+        .logo-empresa {
+            border-right: 2px solid #000;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
 
-// Datos de la empresa emisora (El Timbrado) - SUS DATOS ORIGINALES
-$datos_timbrado = [
-    'RUC_EMISOR' => '4011514-3', 
-    'TIMBRADO' => '300108',
-    'FECHA_INICIO_VIGENCIA' => date("d/m/Y", strtotime($fecha_inicio_vigencia)),
-    'FECHA_FIN_VIGENCIA' => date("d/m/Y", strtotime($fecha_fin_vigencia)),
-    'SUCURSAL' => '001', // Asumido para el formato KuDE (Sucursal-Punto-Nro)
-    'PUNTO_EXPEDICION' => '001', // Asumido para el formato KuDE
-];
+        .logo-empresa img {
+            max-width: 80px;
+            max-height: 60px;
+            margin-bottom: 5px;
+        }
 
-// ID de Venta
-$id_venta = isset($_GET['id']) ? (int)$_GET['id'] : 1; // Usamos un fallback si no hay ID
+        .logo-empresa .nombre-empresa {
+            font-size: 10pt;
+            font-weight: bold;
+            text-align: center;
+        }
 
-// Componemos el número de factura completo (Sucursal - Punto - ID Venta)
-$numero_factura_completo = "{$datos_timbrado['SUCURSAL']}-{$datos_timbrado['PUNTO_EXPEDICION']}-" . 
-                          str_pad($id_venta, 7, '0', STR_PAD_LEFT); 
+        .datos-empresa {
+            border-right: 2px solid #000;
+            padding: 8px;
+            font-size: 7.5pt;
+            line-height: 1.3;
+        }
 
-// Datos estáticos de su empresa (MILLION TECH)
-$RAZON_SOCIAL_EMISOR = 'MILLION TECH S.A.'; 
-$DIRECCION_EMISOR = 'Km10, Ciudad del Este'; // Dirección asumida en base al Punto de Expedición
-$CIUDAD_EMISOR = 'Ciudad del Este, Alto Paraná';
-$TELEFONO_EMISOR = '0981 123 456';
-$ACTIVIDAD_ECONOMICA = 'Venta de productos electrónicos';
+        .datos-timbrado {
+            padding: 8px;
+            font-size: 7.5pt;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
 
+        .factura-tipo {
+            text-align: center;
+            padding: 5px;
+            border: 2px solid #000;
+            margin-top: 5px;
+            background-color: #f5f5f5;
+        }
 
-// ***************************************************************
-// NOTA: Las variables $cliente, $productos, $sumaTotal, $iva5, etc.
-// DEBEN ser cargadas ANTES de este código para que el PDF muestre datos.
-// Se utilizan valores de FALLBACK genéricos para que el código compile.
-// ***************************************************************
+        .factura-tipo .titulo {
+            font-weight: bold;
+            font-size: 9pt;
+        }
 
-// FALLBACK para variables del cliente/venta (usted debe cargarlas dinámicamente)
-$cliente = $cliente;
-$productos = $productos;
-$sumaTotal10 = $sumaTotal10 ?? 0;
-$sumaTotalexe = $sumaTotalexe ?? 0;
-$sumaTotal5 = $sumaTotal5 ?? 0;
-$iva10_calc = round($sumaTotal10 / 11);
-$iva5 = $iva5 ?? 0;
-$ivaTotal_calc = round($iva5 + $iva10_calc);
-$credito = $credito ?? false; // false para "Contado"
-$montoNoCobrado = $montoNoCobrado ?? 0; // Para descuentos
+        .factura-tipo .numero {
+            font-size: 11pt;
+            font-weight: bold;
+            margin-top: 2px;
+        }
 
+        /* LÍNEA DE FECHA Y CONDICIÓN */
+        .linea-fecha {
+            display: grid;
+            grid-template-columns: 15% 35% 25% 25%;
+            border: 2px solid #000;
+            border-top: none;
+            font-size: 8pt;
+        }
 
-// ==========================================================
-// 2. INICIALIZACIÓN DE PDF y CSS PARA ESTÉTICA KUDE
-// ==========================================================
+        .linea-fecha>div {
+            padding: 6px 8px;
+            border-right: 2px solid #000;
+        }
 
-$pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
-$pdf->SetMargins(10, 10, 10);
-$pdf->SetAutoPageBreak(TRUE, 10);
-$pdf->SetPrintHeader(false);
-$pdf->SetPrintFooter(false);
-$pdf->AddPage();
+        .linea-fecha>div:last-child {
+            border-right: none;
+        }
 
-// CSS para la estética KuDE (Adaptado para TCPDF HTML/CSS)
-$style = <<<EOT
-<style>
-    .factura-box {
-        border: 1px solid #000;
-        padding: 5px;
-        background-color: #f7f7f7;
-        line-height: 12px;
+        .linea-fecha label {
+            font-weight: bold;
+            font-size: 7pt;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* DATOS DEL CLIENTE */
+        .datos-cliente {
+            border: 2px solid #000;
+            border-top: none;
+            font-size: 8pt;
+        }
+
+        .cliente-fila {
+            display: grid;
+            border-bottom: 1px solid #000;
+        }
+
+        .cliente-fila:last-child {
+            border-bottom: none;
+        }
+
+        .cliente-fila-1 {
+            grid-template-columns: 50% 50%;
+        }
+
+        .cliente-fila-2 {
+            grid-template-columns: 25% 75%;
+        }
+
+        .cliente-fila>div {
+            padding: 6px 8px;
+            border-right: 1px solid #000;
+        }
+
+        .cliente-fila>div:last-child {
+            border-right: none;
+        }
+
+        .cliente-fila label {
+            font-weight: bold;
+            font-size: 7pt;
+        }
+
+    /* TABLA DE PRODUCTOS - CSS CORREGIDO */
+.tabla-productos {
+    border: 2px solid #000;
+    border-top: none;
+}
+
+.productos-header {
+    display: grid;
+    grid-template-columns: 8% 32% 15% 15% 15% 15%;
+    background-color: #e8e8e8;
+    border-bottom: 1px solid #000;
+    font-weight: bold;
+    font-size: 7pt;
+}
+
+.productos-header > div {
+    padding: 5px 3px;
+    border-right: 1px solid #000;
+    text-align: center;
+}
+
+.productos-header > div:last-child {
+    border-right: none;
+}
+
+.productos-subheader {
+    display: grid;
+    grid-template-columns: 8% 32% 15% 15% 15% 15%;
+    background-color: #e8e8e8;
+    border-bottom: 2px solid #000;
+    font-weight: bold;
+    font-size: 7pt;
+}
+
+.productos-subheader > div {
+    padding: 3px;
+    border-right: 1px solid #000;
+}
+
+.productos-subheader > div:last-child {
+    border-right: none;
+}
+
+.producto-item {
+    display: grid;
+    grid-template-columns: 8% 32% 15% 15% 15% 15%;
+    border-bottom: 1px solid #000;
+    font-size: 8pt;
+    min-height: 22px;
+}
+
+.producto-item > div {
+    padding: 4px 5px;
+    border-right: 1px solid #000;
+}
+
+.producto-item > div:last-child {
+    border-right: none;
+}
+
+        .valores-venta {
+            display: grid;
+            grid-template-columns: 33.33% 33.33% 33.34%;
+        }
+
+        .valores-venta>div {
+            border-right: 1px solid #000;
+            text-align: right;
+            padding: 4px 5px;
+        }
+
+        .valores-venta>div:last-child {
+            border-right: none;
+        }
+
+        /* SECCIÓN DE TOTALES */
+        .seccion-totales {
+            display: grid;
+            grid-template-columns: 60% 40%;
+            border: 2px solid #000;
+            border-top: none;
+        }
+
+        .totales-izquierda {
+            border-right: 2px solid #000;
+        }
+
+        .subtotal-box {
+            padding: 8px;
+            border-bottom: 2px solid #000;
+            font-size: 8pt;
+        }
+
+        .subtotal-box label {
+            font-weight: bold;
+            font-size: 7pt;
+        }
+
+        .total-pagar-box {
+            padding: 8px;
+            border-bottom: 2px solid #000;
+            font-size: 9pt;
+        }
+
+        .total-pagar-label {
+            font-weight: bold;
+            font-size: 7pt;
+            margin-bottom: 3px;
+        }
+
+        .total-pagar-monto {
+            font-size: 12pt;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .liquidacion-box {
+            padding: 8px;
+            font-size: 7pt;
+        }
+
+        .liquidacion-titulo {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+            padding: 3px;
+            background-color: #e8e8e8;
+            border: 1px solid #000;
+        }
+
+        .liquidacion-tabla {
+            display: grid;
+            grid-template-columns: 40% 20% 20% 20%;
+            font-size: 7pt;
+        }
+
+        .liquidacion-tabla>div {
+            border: 1px solid #000;
+            padding: 3px;
+            text-align: center;
+        }
+
+        .liquidacion-header {
+            background-color: #e8e8e8;
+            font-weight: bold;
+        }
+
+        .totales-derecha {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .subtotales-der {
+            padding: 5px 8px;
+            border-bottom: 1px solid #000;
+            font-size: 8pt;
+            flex: 1;
+        }
+
+        .subtotal-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+        }
+
+        .subtotal-item label {
+            font-size: 7pt;
+        }
+
+        .firma-box {
+            padding: 10px;
+            text-align: center;
+            border-top: 2px solid #000;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .firma-tipo {
+            font-weight: bold;
+            font-size: 8pt;
+        }
+
+        .firma-linea {
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            font-size: 7pt;
+        }
+
+        /* UTILIDADES */
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        /* BOTÓN IMPRIMIR */
+        .print-button {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .print-button button {
+            background-color: #333;
+            color: white;
+            padding: 10px 25px;
+            border: 2px solid #000;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .print-button button:hover {
+            background-color: #555;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .factura-container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <?php
+    // ==========================================================
+    // PREPARACIÓN DE DATOS (igual que antes)
+    // ==========================================================
+
+    $fecha_emision = date('Y-m-d');
+    $fecha_inicio_vigencia = $fecha_emision;
+
+    $fecha_fin_vigencia_obj = new DateTime($fecha_inicio_vigencia);
+    $fecha_fin_vigencia_obj->modify('+1 month -1 day');
+    $fecha_fin_vigencia = $fecha_fin_vigencia_obj->format('Y-m-d');
+
+    $datos_timbrado = [
+        'RUC_EMISOR' => '4011514-3',
+        'TIMBRADO' => '300108',
+        'FECHA_INICIO_VIGENCIA' => date("d/m/Y", strtotime($fecha_inicio_vigencia)),
+        'FECHA_FIN_VIGENCIA' => date("d/m/Y", strtotime($fecha_fin_vigencia)),
+        'SUCURSAL' => '001',
+        'PUNTO_EXPEDICION' => '001',
+    ];
+
+    $id_venta = isset($_GET['id']) ? (int)$_GET['id'] : 1;
+    $numero_factura_completo = "{$datos_timbrado['SUCURSAL']}-{$datos_timbrado['PUNTO_EXPEDICION']}-" . str_pad($id_venta, 7, '0', STR_PAD_LEFT);
+
+    $RAZON_SOCIAL_EMISOR = 'MILLION TECH S.A.';
+    $DIRECCION_EMISOR = 'Km10, Ciudad del Este';
+    $CIUDAD_EMISOR = 'Ciudad del Este, Alto Paraná';
+    $TELEFONO_EMISOR = '0981 123 456';
+    $EMAIL_EMISOR = 'info@milliontech.com.py';
+
+    $cliente = $cliente ?? (object)[
+        'ci' => '123456-7',
+        'nombre' => 'Cliente Ejemplo',
+        'direccion' => 'Dirección del cliente',
+        'telefono' => '0981 123 456',
+    ];
+
+    $productos = $productos ?? [];
+
+    $sumaTotal10 = 0;
+    foreach ($productos as $p) {
+        $subtotal = $p->precio_unitario * $p->cantidad;
+        $sumaTotal10 += $subtotal;
     }
-    .header-info {
-        font-size: 8pt;
-        line-height: 12px;
-    }
-    .datos-cliente-table {
-        width: 100%;
-        border-collapse: collapse;
-        border: 1px solid #000;
-        margin-top: 8px;
-        font-size: 8pt;
-    }
-    .datos-cliente-table td {
-        border-right: 1px solid #000;
-        padding: 3px;
-        line-height: 10px;
-    }
-    .items-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-        font-size: 7.5pt;
-    }
-    .items-table th, .items-table td {
-        border: 1px solid #000;
-        padding: 3px 2px;
-        line-height: 9px;
-    }
-    .items-table th {
-        background-color: #e8e8e8;
-        font-weight: bold;
-        text-align: center;
-    }
-    .items-table .text-right { text-align: right; }
-    .items-table .text-center { text-align: center; }
-    .totales-table {
-        width: 100%;
-        margin-top: 10px;
-        font-size: 8pt;
-    }
-    .totales-table td {
-        line-height: 12px;
-        padding: 1px 3px;
-    }
-    .totales-table .total-line {
-        font-weight: bold;
-        border: 1px solid #000;
-        padding: 3px;
-    }
-    .liquid-iva-box {
-        border: 1px solid #000;
-        padding: 3px;
-        margin-top: 5px;
-        background-color: #f7f7f7;
-    }
-    .liquidacion-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 7.5pt;
-    }
-    .liquidacion-table td {
-        padding: 2px 5px;
-        line-height: 10px;
-    }
-</style>
-EOT;
 
-$pdf->writeHTML($style, true, false, true, false, '');
+    $sumaTotalexe = $sumaTotalexe ?? 0;
+    $sumaTotal5 = $sumaTotal5 ?? 0;
+    $sumaTotal = $sumaTotal10 + $sumaTotal5 + $sumaTotalexe;
+    $iva10_calc = round($sumaTotal10 / 11);
+    $ivaTotal_calc = $iva10_calc;
+    $iva5 = $iva5 ?? 0;
 
+    $sumaTotalexeV = number_format($sumaTotalexe, 0, ",", ".");
+    $sumaTotal5V = number_format($sumaTotal5, 0, ",", ".");
+    $sumaTotal10V = number_format($sumaTotal10, 0, ",", ".");
+    $iva5V = number_format($iva5, 0, ",", ".");
+    $iva10V = number_format($iva10_calc, 0, ",", ".");
+    $ivaTotalV = number_format($ivaTotal_calc, 0, ",", ".");
+    $sumaTotalV = number_format($sumaTotal, 0, ",", ".");
+    ?>
 
-// ==========================================================
-// 3. ESTRUCTURA DE LA FACTURA (KuDE)
-// ==========================================================
+    <!-- BOTÓN IMPRIMIR -->
+    <div class="print-button no-print">
+        <button onclick="window.print()">IMPRIMIR FACTURA</button>
+    </div>
 
-// --- BLOQUE 1: LOGO, DATOS EMISOR Y CAJA TIMBRADO ---
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="factura-container">
+        <div class="factura-borde">
 
-$header_html = '
-    <table width="100%" class="header-info">
-        <tr>
-            <td width="30%" valign="top">
-                    <img src="assets/img/logo.png" alt="Logo" style="max-width: 35px; max-height: 35px; vertical-align: middle;">
-            </td>
-            <td width="35%" valign="top">
-                <div style="font-size: 8pt; line-height: 10px;">
-                    <span style="font-weight: bold;">'.$RAZON_SOCIAL_EMISOR.'</span><br>
-                    Sistema Integrado de Facturación Electrónica Nacional<br>
-                    Dirección: '.$DIRECCION_EMISOR.'<br>
-                    Ciudad: '.$CIUDAD_EMISOR.'<br>
-                    Teléfono: '.$TELEFONO_EMISOR.'<br>
-                    Actividad económica: '.$ACTIVIDAD_ECONOMICA.'
+            <!-- ENCABEZADO -->
+            <div class="encabezado-principal">
+                <div class="logo-empresa">
+                    <img src="assets/img/logo.png" alt="Logo">
+                    <div class="nombre-empresa"><?php echo $RAZON_SOCIAL_EMISOR; ?></div>
                 </div>
-            </td>
-            <td width="35%" valign="top">
-                <div class="factura-box">
-                    RUC: <span style="font-weight: bold;">'.$datos_timbrado['RUC_EMISOR'].'</span><br>
-                    Timbrado N°: <span style="font-weight: bold;">'.$datos_timbrado['TIMBRADO'].'</span><br>
-                    Fecha de Inicio de Vigencia: '.$datos_timbrado['FECHA_INICIO_VIGENCIA'].'<br>
-                    Fecha de Fin de Vigencia: '.$datos_timbrado['FECHA_FIN_VIGENCIA'].'<br>
-                    <div style="border-top: 1px solid #ccc; margin-top: 3px; padding-top: 3px;">
-                        <span style="font-weight: bold; font-size: 9pt;">FACTURA ELECTRÓNICA</span><br>
-                        <span style="font-weight: bold; font-size: 11pt; color: #d9534f;">'.$numero_factura_completo.'</span>
+
+                <div class="datos-empresa">
+                    Construcciones de viviendas, edificios y casas<br>
+                    Refacciones en General. Electricidad y Plomería<br>
+                    <strong>Dirección:</strong> <?php echo $DIRECCION_EMISOR; ?><br>
+                    <strong>Ciudad:</strong> <?php echo $CIUDAD_EMISOR; ?> - Tel.: <?php echo $TELEFONO_EMISOR; ?><br>
+                    <strong>E-mail:</strong> <?php echo $EMAIL_EMISOR; ?>
+                </div>
+
+                <div class="datos-timbrado">
+                    <div>
+                        <strong>RUC:</strong> <?php echo $datos_timbrado['RUC_EMISOR']; ?><br>
+                        <strong>TIMBRADO N°:</strong> <?php echo $datos_timbrado['TIMBRADO']; ?><br>
+                        <strong>Inicio Vigencia:</strong><br><?php echo $datos_timbrado['FECHA_INICIO_VIGENCIA']; ?><br>
+                        <strong>Fin de Vigencia:</strong><br><?php echo $datos_timbrado['FECHA_FIN_VIGENCIA']; ?>
+                    </div>
+
+                    <div class="factura-tipo">
+                        <div class="titulo">FACTURA</div>
+                        <div class="numero">N° <?php echo $numero_factura_completo; ?></div>
                     </div>
                 </div>
-            </td>
-        </tr>
-    </table>
-    <br><br>
-';
-$pdf->writeHTML($header_html, true, false, true, false, '');
+            </div>
 
-// --- BLOQUE 2: DATOS DE LA VENTA Y CLIENTE ---
-
-$datos_transaccion_cliente_html = '
-    <table class="datos-cliente-table">
-        <tr>
-            <td width="50%">
-                <span style="font-weight: bold;">Fecha y hora de emisión:</span> '.date('d-m-Y H:i:s', strtotime($fecha_emision)).'<br>
-                <span style="font-weight: bold;">Condición de venta:</span> <span style="text-decoration: underline;">Contado,</span><br>
-                <span style="font-weight: bold;">Moneda:</span> PYG<br>
-            </td>
-            <td width="50%">
-                <span style="font-weight: bold;">RUC/Documento de Identidad No:</span> '.$cliente->ci.'<br>
-                <span style="font-weight: bold;">Nombre o Razón Social:</span> '.$cliente->nombre.'<br>
-                <span style="font-weight: bold;">Dirección:</span> '.$cliente->direccion.'<br>
-                <span style="font-weight: bold;">Teléfono:</span> '.$cliente->telefono.'<br>
-                <span style="font-weight: bold;">Correo Electrónico:</span> '.$cliente->email.'<br>
-                <span style="font-weight: bold;">Tipo de Operación:</span> Venta de Mercadería
-            </td>
-        </tr>
-    </table>
-';
-$pdf->writeHTML($datos_transaccion_cliente_html, true, false, true, false, '');
-
-// --- BLOQUE 3: DETALLE DE PRODUCTOS ---
-
-$items_html = '
-    <table class="items-table">
-        <thead>
-            <tr>
-                <th width="8%" class="text-center">Cod</th>
-                <th width="28%" class="text-center">Descripción</th>
-                <th width="10%" class="text-center">Unidad de medida</th>
-                <th width="8%" class="text-center">Cantidad</th>
-                <th width="12%" class="text-center">Precio Unitario</th>
-                <th width="10%" class="text-center">Descuento</th>
-                <th width="24%" class="text-center" colspan="3">Valor de Venta</th>
-            </tr>
-            <tr>
-                <th width="8%"></th>
-                <th width="28%"></th>
-                <th width="10%"></th>
-                <th width="8%"></th>
-                <th width="12%"></th>
-                <th width="10%"></th>
-                <th width="8%" class="text-center">Exentas</th>
-                <th width="8%" class="text-center">5%</th>
-                <th width="8%" class="text-center">10%</th>
-            </tr>
-        </thead>
-        <tbody>
-';
-
-$cantidad_items = 0;
-foreach ($productos as $r) {
-    $cantidad_items++;
-    
-    // Variables para el ítem
-    $codigo = substr($r->id_producto ?? $r['id'], -5) ?? '';
-    $descripcion = $r->nombre_producto ?? $r['nombre_producto'] ?? 'Producto Desconocido';
-    $cantidad = $r->cantidad ?? $r['cantidad'] ?? 1;
-    $precio_unitario = $r->precio_unitario ?? $r['precio_unitario'] ?? 0;
-    
-    // Su lógica de valor de venta (Debe ser llenada en el $productos original)
-    $monto_exentas = 0; // Ejemplo: 0
-    $monto_5 = 0;      // Ejemplo: 0
-    $monto_10 = $r->total ?? $r['total'] ?? 0; // Ejemplo: Se asume que el total del ítem es 10%
-
-    $items_html .= '
-        <tr>
-            <td class="text-center">'.$codigo.'</td>
-            <td>'.$descripcion.'</td>
-            <td class="text-center">UNI</td>
-            <td class="text-center">'.$cantidad.'</td>
-            <td class="text-right">'.number_format($precio_unitario, 0, ',', '.').'</td>
-            <td class="text-right">0</td>
-            <td class="text-right">'.number_format($monto_exentas, 0, ',', '.').'</td>
-            <td class="text-right">'.number_format($monto_5, 0, ',', '.').'</td>
-            <td class="text-right">'.number_format($monto_10, 0, ',', '.').'</td>
-        </tr>
-    ';
-}
-
-// LÍNEA DE DESCUENTO (Si $montoNoCobrado es > 0)
-if ($montoNoCobrado > 0) {
-    $cantidad_items++;
-    $items_html .= '
-        <tr>
-            <td class="text-center">DSCTO</td>
-            <td>DESCUENTO</td>
-            <td class="text-center">UNI</td>
-            <td class="text-center">1</td>
-            <td class="text-right">'.number_format(-$montoNoCobrado, 0, ',', '.').'</td>
-            <td class="text-right">0</td>
-            <td class="text-right">0</td>
-            <td class="text-right">0</td>
-            <td class="text-right">'.number_format(-$montoNoCobrado, 0, ',', '.').'</td>
-        </tr>
-    ';
-}
-
-// Rellenar con líneas vacías para mantener la estética KuDE (8 filas mínimo)
-$max_filas = 8;
-for ($i = $cantidad_items; $i < $max_filas; $i++) {
-    $items_html .= '
-        <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-        </tr>
-    ';
-}
-
-$items_html .= '</tbody></table>';
-$pdf->writeHTML($items_html, true, false, true, false, '');
-
-// --- BLOQUE 4: TOTALES Y LIQUIDACIÓN IVA ---
-
-// Formato de los totales
-$montoEntero = intval(round($sumaTotal));
-$letras = NumeroALetras::convertir($montoEntero, 'Guaraníes');
-$sumaTotalV = number_format($montoEntero, 0, ",", ".");
-$sumaTotalexeV = number_format($sumaTotalexe, 0, ",", "."); 
-$sumaTotal5V = number_format($sumaTotal5, 0, ",", "."); 
-$sumaTotal10V = number_format($sumaTotal10, 0, ",", "."); 
-$iva5V = number_format($iva5, 0, ",", "."); 
-$iva10V = number_format($iva10_calc, 0, ",", ".");
-$ivaTotalV = number_format($ivaTotal_calc, 0, ",", ".");
-
-
-$totales_html = '
-    <table class="totales-table" style="border: 1px solid #000;">
-        <tr>
-            <td width="70%" style="border-right: 1px solid #000; border-bottom: 1px solid #000; padding: 5px;">
-                <span style="font-weight: bold;">TOTAL EN LETRAS:</span> '.$letras.'
-            </td>
-            <td width="30%" style="border-bottom: 1px solid #000; padding: 0;">
-                <table width="100%" border="0" cellpadding="3" cellspacing="0">
-                    <tr>
-                        <td width="55%" style="font-weight: bold; border-bottom: 1px solid #ccc; padding: 3px;">SUB-TOTALES:</td>
-                        <td width="45%" class="text-right" style="border-bottom: 1px solid #ccc; padding: 3px;"></td>
-                    </tr>
-                    <tr>
-                        <td width="55%" style="padding: 3px;">Exentas:</td>
-                        <td width="45%" class="text-right" style="padding: 3px;">'.$sumaTotalexeV.'</td>
-                    </tr>
-                    <tr>
-                        <td width="55%" style="padding: 3px;">Gravadas 5%:</td>
-                        <td width="45%" class="text-right" style="padding: 3px;">'.$sumaTotal5V.'</td>
-                    </tr>
-                    <tr>
-                        <td width="55%" style="padding: 3px; border-bottom: 1px solid #ccc;">Gravadas 10%:</td>
-                        <td width="45%" class="text-right" style="padding: 3px; border-bottom: 1px solid #ccc;">'.$sumaTotal10V.'</td>
-                    </tr>
-                    <tr>
-                        <td width="55%" style="font-weight: bold; padding: 3px; border-bottom: 1px solid #000;">TOTAL A PAGAR:</td>
-                        <td width="45%" class="text-right" style="font-weight: bold; padding: 3px; border-bottom: 1px solid #000; background-color: #e8e8e8;">'.$sumaTotalV.'</td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td width="70%" style="border-right: 1px solid #000; padding: 5px;" valign="top">
-                <div style="border: 1px solid #000; padding: 5px; background-color: #f7f7f7;">
-                    <div style="font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 5px;">LIQUIDACIÓN DEL IVA</div>
-                    <table width="100%" border="0" cellpadding="3" cellspacing="0" style="font-size: 7.5pt;">
-                        <tr style="font-weight: bold; background-color: #e8e8e8; border-bottom: 1px solid #000;">
-                            <td width="40%">Concepto</td>
-                            <td width="20%" class="text-right">5%</td>
-                            <td width="20%" class="text-right">10%</td>
-                            <td width="20%" class="text-right">Total</td>
-                        </tr>
-                        <tr>
-                            <td width="40%" style="padding: 3px;">Valor de Venta:</td>
-                            <td width="20%" class="text-right" style="padding: 3px;">'.$sumaTotal5V.'</td>
-                            <td width="20%" class="text-right" style="padding: 3px;">'.$sumaTotal10V.'</td>
-                            <td width="20%" class="text-right" style="padding: 3px;">'.number_format($sumaTotal5 + $sumaTotal10, 0, ",", ".").'</td>
-                        </tr>
-                        <tr style="font-weight: bold; background-color: #f0f0f0;">
-                            <td width="40%" style="padding: 3px; border-top: 1px solid #ccc;">Liquidación IVA:</td>
-                            <td width="20%" class="text-right" style="padding: 3px; border-top: 1px solid #ccc;">'.$iva5V.'</td>
-                            <td width="20%" class="text-right" style="padding: 3px; border-top: 1px solid #ccc;">'.$iva10V.'</td>
-                            <td width="20%" class="text-right" style="padding: 3px; border-top: 1px solid #ccc; background-color: #e8e8e8;">'.$ivaTotalV.'</td>
-                        </tr>
-                    </table>
+            <!-- LÍNEA DE FECHA Y CONDICIÓN -->
+            <div class="linea-fecha">
+                <div>
+                    <label>FECHA DE EMISIÓN:</label>
+                    <?php echo date('d/m/Y', strtotime($fecha_emision)); ?>
                 </div>
-            </td>
-            <td width="30%" style="padding: 5px;" valign="top">
-                <div style="border: 1px solid #000; padding: 5px; text-align: center; min-height: 60px;">
-                    <div style="font-size: 7pt; margin-bottom: 30px;">ORIGINAL</div>
-                    <div style="border-top: 1px solid #000; padding-top: 3px; font-size: 7pt;">
-                        Firma y Sello del Emisor
+                <div style="display: flex; gap: 10px;">
+                    <div>
+                        <label>CONDICIÓN DE VENTA:</label>
+                        <input type="checkbox" checked> CONTADO
+                        <input type="checkbox"> CRÉDITO
                     </div>
                 </div>
-            </td>
-        </tr>
-    </table>
-';
-$pdf->writeHTML($totales_html, true, false, true, false, '');
+                <div>
+                    <label>NOTA DE REMISIÓN N°:</label>
+                </div>
+                <div>
+                    <label>&nbsp;</label>
+                </div>
+            </div>
 
+            <!-- DATOS DEL CLIENTE -->
+            <div class="datos-cliente">
+                <div class="cliente-fila cliente-fila-1">
+                    <div>
+                        <label>NOMBRE O RAZÓN SOCIAL:</label>
+                        <?php echo $cliente->nombre; ?>
+                    </div>
+                    <div>
+                        <label>RUC O CÉDULA DE IDENTIDAD:</label>
+                        <?php echo $cliente->ci; ?>
+                    </div>
+                </div>
+                <div class="cliente-fila cliente-fila-2">
+                    <div>
+                        <label>DIRECCIÓN:</label>
+                        <?php echo $cliente->direccion; ?>
+                    </div>
+                    <div>
+                        <label>TELÉFONO:</label>
+                        <?php echo $cliente->telefono; ?>
+                    </div>
+                </div>
+            </div>
+<!-- TABLA DE PRODUCTOS - VERSIÓN CORREGIDA -->
+<div class="tabla-productos">
+    <div class="productos-header">
+        <div style="grid-column: 1;">CANT</div>
+        <div style="grid-column: 2;">DESCRIPCIÓN</div>
+        <div style="grid-column: 3;">PRECIO<br>UNITARIO</div>
+        <div style="grid-column: 4 / 7; text-align: center; padding: 5px;">
+            VALOR DE VENTA
+        </div>
+    </div>
+    
+    <div class="productos-subheader">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div class="text-center">EXENTAS</div>
+        <div class="text-center">5 %</div>
+        <div class="text-center">10 %</div>
+    </div>
 
-// ==========================================================
-// 4. GENERACIÓN DEL PDF (Incluye Duplicado sin Pie de Página)
-// ==========================================================
+    <?php
+    $cantidad_items = 0;
+    foreach ($productos as $r) {
+        $cantidad_items++;
+        
+        $descripcion = $r->nombre_producto ?? 'Producto';
+        $cantidad = $r->cantidad ?? 1;
+        $precio_unitario = $r->precio_unitario ?? 0;
+        
+        $monto_exentas = 0;
+        $monto_5 = 0;
+        $monto_10 = ($precio_unitario * $cantidad) / 11;
+    ?>
+    <div class="producto-item">
+        <div class="text-center"><?php echo $cantidad; ?></div>
+        <div><?php echo $descripcion; ?></div>
+        <div class="text-right"><?php echo number_format($precio_unitario, 0, ',', '.'); ?></div>
+        <div class="text-right"><?php echo number_format($monto_exentas, 0, ',', '.'); ?></div>
+        <div class="text-right"><?php echo number_format($monto_5, 0, ',', '.'); ?></div>
+        <div class="text-right"><?php echo number_format($monto_10, 0, ',', '.'); ?></div>
+    </div>
+    <?php
+    }
+    
+    // Filas vacías
+    $max_filas = 10;
+    for ($i = $cantidad_items; $i < $max_filas; $i++) {
+        echo '<div class="producto-item">';
+        echo '<div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>';
+        echo '</div>';
+    }
+    ?>
+</div>
 
-// Duplicado (Salto de página para la copia)
-$pdf->AddPage(); 
-$pdf->writeHTML($header_html, true, false, true, false, '');
-$pdf->writeHTML($datos_transaccion_cliente_html, true, false, true, false, '');
-$pdf->writeHTML($items_html, true, false, true, false, '');
-$pdf->writeHTML($totales_html, true, false, true, false, '');
+            <!-- SECCIÓN DE TOTALES -->
+            <div class="seccion-totales">
+                <div class="totales-izquierda">
+                    <div class="subtotal-box">
+                        <label>SUB TOTAL:</label>
+                    </div>
 
-$pdf->Output('factura_electronica_kude.pdf', 'I');
-//============================================================+
+                    <div class="total-pagar-box">
+                        <div class="total-pagar-label">TOTAL A PAGAR Gs.:</div>
+                        <div class="total-pagar-monto"><?php echo $sumaTotalV; ?></div>
+                    </div>
+
+                    <div class="liquidacion-box">
+                        <div class="liquidacion-titulo">LIQUIDACIÓN DEL IVA (5%)</div>
+                        <div class="liquidacion-tabla">
+                            <div class="liquidacion-header">&nbsp;</div>
+                            <div class="liquidacion-header">(10 %)</div>
+                            <div class="liquidacion-header">&nbsp;</div>
+                            <div class="liquidacion-header">TOTAL IVA:</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="totales-derecha">
+                    <div class="subtotales-der">
+                        <div class="subtotal-item">
+                            <label>EXENTAS:</label>
+                            <span><?php echo $sumaTotalexeV; ?></span>
+                        </div>
+                        <div class="subtotal-item">
+                            <label>5%:</label>
+                            <span><?php echo $sumaTotal5V; ?></span>
+                        </div>
+                        <div class="subtotal-item">
+                            <label>10%:</label>
+                            <span><?php echo $sumaTotal10V; ?></span>
+                        </div>
+                    </div>
+
+                    <div class="firma-box">
+                        <div class="firma-tipo">ORIGINAL - Comprobante</div>
+                        <div class="firma-linea">COPIA - Arch. Tributario</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>

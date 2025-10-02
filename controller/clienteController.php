@@ -134,6 +134,12 @@ class clienteController {
         $this->model->actualizar($cliente);
         header('Location: index.php?c=cliente');
     }
+
+    public function borrar(){
+        $id = $_REQUEST['id'];
+        $this->model->eliminar($id);
+        header('Location: index.php?c=dashboard&a=clientes');
+    }
     
 
 

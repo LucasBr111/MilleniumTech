@@ -29,18 +29,17 @@ class facturaController{
 
 
     public function generarfactura(){
-        $id_venta = $_POST['id_venta'];
-        $id_cliente = $_POST['id_cliente'];
-        $tipo_documento = $_POST['facturas'];
+        $id_venta = $_REQUEST['id_venta'];
+        $id_cliente = $_REQUEST['id_cliente'];
+        $tipo_documento = $_REQUEST['facturas'] ?? 'factura';
         if ($tipo_documento === 'factura') {
             $productos = $this->venta->obtenerDetallesVenta($id_venta);
             $cliente = $this->clientes->obtenerUsuario($id_cliente);
             require_once 'view/facturas/factura.php';
-        } elseif ($tipo_documento === 'ticket') {
-            // $this->venta->generarTicket($id_venta, $id_cliente);
+        }else {
+            $productos = $this->venta->obtenerDetallesVenta($id_venta);
+            $cliente = $this->clientes->obtenerUsuario($id_cliente);
             require_once 'view/facturas/ticket.php';
-        } else {
-            echo "<div class='alert alert-danger'>Error: Tipo de documento no válido.</div>";
         }
     }
 }

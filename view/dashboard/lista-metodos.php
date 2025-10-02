@@ -8,16 +8,15 @@ $metodos_con_ingresos = $metodos_con_ingresos ?? [];
 // Para calcular el total general de todos los ingresos:
 $gran_total_ingresos = 0.00;
 foreach ($metodos_con_ingresos as $metodo) {
-    $gran_total_ingresos += (float)($metodo->ingreso_total ?? 0);
+    $gran_total_ingresos += (float)($metodo->ingresos_totales ?? 0);
 }
 
 // Mapeo simple de iconos (si no vienen del modelo) para mejor estética
 $iconos_default = [
-    'Tarjeta de Crédito' => 'fas fa-credit-card',
-    'Transferencia Bancaria' => 'fas fa-university',
-    'PayPal' => 'fab fa-paypal',
-    'Efectivo' => 'fas fa-money-bill-wave',
-    'Otro' => 'fas fa-wallet'
+    'Tarjeta' => 'fas fa-credit-card',
+    'Transferencia' => 'fas fa-university',
+    'QR' => 'fab fa-paypal',
+
 ];
 // =================================================================================
 ?>
@@ -30,7 +29,7 @@ $iconos_default = [
     <div class="card bg-success text-white mb-5 shadow-lg">
         <div class="card-body d-flex justify-content-between align-items-center">
             <h4 class="card-title mb-0">TOTAL DE INGRESOS REGISTRADOS:</h4>
-            <span class="fs-2 fw-bold">$<?php echo number_format($gran_total_ingresos, 2); ?></span>
+            <span class="fs-2 fw-bold">=GS <?php echo number_format($gran_total_ingresos, 2); ?></span>
         </div>
     </div>
 
@@ -63,7 +62,7 @@ $iconos_default = [
                                 <?php echo htmlspecialchars($nombre); ?>
                             </h5>
                             <p class="card-text fs-4 fw-bold mb-0 text-dark">
-                                $<?php echo number_format($ingreso); ?>
+                            GS. <?php echo number_format($ingreso); ?>
                             </p>
                             <?php 
                                 $porcentaje = ($gran_total_ingresos > 0) ? ($ingreso / $gran_total_ingresos) * 100 : 0;
@@ -79,19 +78,14 @@ $iconos_default = [
                         </div>
                     </div>
                 </div>
-                <div class="card-footer bg-light border-0 text-end">
+                <!-- <div class="card-footer bg-light border-0 text-end">
                     <a href="?c=metodopago&a=configurar&nombre=<?php echo urlencode($nombre); ?>" class="btn btn-sm btn-outline-secondary">
                         <i class="fas fa-cog"></i> Configurar
                     </a>
-                </div>
+                </div> -->
             </div>
         </div>
         <?php endforeach; ?>
         
     </div>
 </div>
-
-<script>
-    // No se requiere DataTables aquí, pero si quieres añadir funcionalidad
-    // de arrastrar y soltar o algo más, este es el lugar para el JS.
-</script>

@@ -28,7 +28,7 @@
                     <div class="hero-content">
                         <h1 class="hero-title">Gaming Revolution</h1>
                         <p class="hero-description">Descubre la última tecnología gaming con equipos de alto rendimiento que llevarán tu experiencia al siguiente nivel. Componentes premium para gamers exigentes.</p>
-         <!--                <a href="#featured-products" class="hero-cta">
+                        <!--                <a href="#featured-products" class="hero-cta">
                             <i class="fas fa-gamepad"></i>
                             Explorar Gaming
                         </a> -->
@@ -70,7 +70,7 @@
                     <div class="hero-content">
                         <h1 class="hero-title">Visual Experience</h1>
                         <p class="hero-description">Monitores gaming 4K con frecuencias de actualización ultrarrápidas. Experimenta cada detalle con claridad cristalina y colores vibrantes.</p>
-                       <!--  <a href="#featured-products" class="hero-cta">
+                        <!--  <a href="#featured-products" class="hero-cta">
                             <i class="fas fa-desktop"></i>
                             Ver Monitores
                         </a> -->
@@ -114,49 +114,58 @@
 
     <!-- Featured Products Section -->
     <section id="featured-products" class="py-5 fade-in-up">
-        <div class="text-center mb-5">
-            <h2 class="section-title">Productos Destacados</h2>
-            <p class="section-subtitle">Lo mejor de nuestro catálogo gaming, seleccionado especialmente para ofrecerte la máxima calidad y rendimiento</p>
-        </div>
-        <div class="product-grid" id="featured-products-grid">
-            <!-- PHP Loop for Featured Products -->
-            <?php if (!empty($productos_destacados)): ?>
-                <?php foreach ($productos_destacados as $producto): ?>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="assets/uploads/productos/<?php echo $producto->imagen ?>" alt="<?= htmlspecialchars($producto->nombre_producto) ?>">
-                            <div class="stock-badge <?= ($producto->stock > 0) ? 'in-stock' : 'out-of-stock' ?>">
-                                <?= ($producto->stock > 0) ? 'En Stock' : 'Sin Stock' ?>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <h5 class="product-title"><?= htmlspecialchars($producto->nombre_producto) ?></h5>
-                            <p class="product-price">Gs. <?= number_format($producto->precio, 0, ',', '.') ?></p>
-                            <div class="product-actions">
-                                <!-- <button class="btn btn-primary-custom btn-add-cart" data-id="<?= $producto->id_producto ?>" <?= ($producto->stock <= 0) ? 'disabled' : '' ?>>
-                                    <i class="fas fa-shopping-cart me-2"></i>Añadir al Carrito
-                                </button> -->
-                                <!-- ver detalles -->
-                                <a class="btn btn-primary-custom btn-view-details" data-id="<?= $producto->id_producto ?>" href='index.php?c=productos&a=detalles&id_producto=<?= $producto->id_producto ?>'">
-                                    <i class="fas fa-info-circle me-2"></i>Ver Detalles
-                                </a>
-                                <button class="btn btn-favorite btn-fav <?= (isset($producto->es_favorito) && $producto->es_favorito) ? 'active' : '' ?>" data-id="<?= $producto->id_producto ?>">
-                                    <i class="<?= (isset($producto->es_favorito) && $producto->es_favorito) ? 'fas text-danger' : 'far' ?> fa-heart"></i>
-                                </button>
-                            </div>
+    <div class="text-center mb-5">
+        <h2 class="section-title">Productos Destacados</h2>
+        <p class="section-subtitle">Lo mejor de nuestro catálogo gaming, seleccionado especialmente para ofrecerte la máxima calidad y rendimiento</p>
+    </div>
+    <div class="product-grid" id="featured-products-grid">
+        <?php if (!empty($productos_destacados)): ?>
+            <?php 
+            $contador = 0;
+            $categoria_anterior = null;
+            foreach ($productos_destacados as $producto): 
+                if ($contador >= 6) break; // solo 6 productos
+
+                // si la categoría es la misma que el producto anterior, saltar
+                if ($producto->id_categoria === $categoria_anterior) {
+                    continue;
+                }
+
+                $categoria_anterior = $producto->id_categoria;
+                $contador++;
+            ?>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="assets/uploads/productos/<?php echo $producto->imagen ?>" alt="<?= htmlspecialchars($producto->nombre_producto) ?>">
+                        <div class="stock-badge <?= ($producto->stock > 0) ? 'in-stock' : 'out-of-stock' ?>">
+                            <?= ($producto->stock > 0) ? 'En Stock' : 'Sin Stock' ?>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="col-12 text-center">
-                    <div class="alert alert-info" style="background: var(--card-bg); border: 1px solid var(--accent-blue); color: var(--accent-blue);">
-                        <i class="fas fa-info-circle me-2"></i>
-                        No hay productos destacados disponibles en este momento.
+                    <div class="product-info">
+                        <h5 class="product-title"><?= htmlspecialchars($producto->nombre_producto) ?></h5>
+                        <p class="product-price">Gs. <?= number_format($producto->precio, 0, ',', '.') ?></p>
+                        <div class="product-actions">
+                            <a class="btn btn-primary-custom btn-view-details" data-id="<?= $producto->id_producto ?>" href="index.php?c=productos&a=detalles&id_producto=<?= $producto->id_producto ?>">
+                                <i class="fas fa-info-circle me-2"></i>Ver Detalles
+                            </a>
+                            <button class="btn btn-favorite btn-fav <?= (isset($producto->es_favorito) && $producto->es_favorito) ? 'active' : '' ?>" data-id="<?= $producto->id_producto ?>">
+                                <i class="<?= (isset($producto->es_favorito) && $producto->es_favorito) ? 'fas text-danger' : 'far' ?> fa-heart"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            <?php endif; ?>
-        </div>
-    </section>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="col-12 text-center">
+                <div class="alert alert-info" style="background: var(--card-bg); border: 1px solid var(--accent-blue); color: var(--accent-blue);">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay productos destacados disponibles en este momento.
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+</section>
+
 
     <!-- Categories Section -->
     <section id="categories" class="categories-section py-5">
@@ -189,20 +198,10 @@
                 </div>
             <?php endif; ?>
         </div>
-
-        <!-- Load More Categories Button -->
-        <?php if (count($categorias) > 6): ?>
-            <div class="text-center mt-4">
-                <button class="load-more-btn" id="load-more-categories" data-loaded="6" data-total="<?= count($categorias) ?>">
-                    <i class="fas fa-plus me-2"></i>Ver Más Categorías
-                    <span class="ms-2">(<?= count($categorias) - 6 ?> restantes)</span>
-                </button>
-            </div>
-        <?php endif; ?>
     </section>
 
     <!-- Featured Banner -->
-  <!--   <div class="featured-banner">
+    <!--   <div class="featured-banner">
         <h3 class="orbitron" style="font-size: 2.5rem; color: var(--primary-gold); margin-bottom: 1rem; position: relative; z-index: 1;">
             🏆 Setup Gaming Profesional
         </h3>
@@ -222,9 +221,22 @@
             <p class="section-subtitle">Los productos favoritos de nuestra comunidad gaming. Calidad y rendimiento comprobados por miles de usuarios</p>
         </div>
         <div class="product-grid">
-            <!-- Recorrer productos desde php -->
             <?php if (!empty($productos)): ?>
-                <?php foreach ($productos as $producto): ?>
+                <?php
+                $contador = 0;
+                $categoria_anterior = null;
+                foreach ($productos as $producto):
+                    // Si ya mostraste 15, corta
+                    if ($contador >= 15) break;
+
+                    // Si este producto es de la misma categoría que el anterior, saltar
+                    if ($producto->id_categoria === $categoria_anterior) {
+                        continue;
+                    }
+
+                    $categoria_anterior = $producto->id_categoria;
+                    $contador++;
+                ?>
                     <div class="product-card">
                         <div class="product-image">
                             <img src="assets/uploads/productos/<?php echo $producto->imagen ?>" alt="<?= htmlspecialchars($producto->nombre_producto) ?>">
@@ -236,16 +248,12 @@
                             <h5 class="product-title"><?= htmlspecialchars($producto->nombre_producto) ?></h5>
                             <p class="product-price">Gs. <?= number_format($producto->precio, 0, ',', '.') ?></p>
                             <div class="product-actions">
-                                                                <!-- Boton de editar si sos admin -->
-                                                                <?php if ($_SESSION['nivel'] === '1'): ?>
+                                <?php if ($_SESSION['nivel'] === '1'): ?>
                                     <button class="btn btn-warning btn-edit-product" data-bs-toggle="modal" data-bs-target="#crudModal" data-c="productos" data-id="<?= $producto->id_producto ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                 <?php endif; ?>
-<!--                                 <button class="btn btn-primary-custom btn-add-cart" data-id="<?= $producto->id_producto ?>" <?= ($producto->stock <= 0) ? 'disabled' : '' ?>>
-                                    <i class="fas fa-shopping-cart me-2"></i>Añadir al Carrito
-                                </button> -->
-                                <a class="btn btn-secondary btn-view-details" data-id="<?= $producto->id_producto ?>" href='index.php?c=productos&a=detalles&id_producto=<?= $producto->id_producto ?>'">
+                                <a class="btn btn-secondary btn-view-details" data-id="<?= $producto->id_producto ?>" href="index.php?c=productos&a=detalles&id_producto=<?= $producto->id_producto ?>">
                                     <i class="fas fa-info-circle me-2"></i>Ver Detalles
                                 </a>
                                 <button class="btn btn-favorite btn-fav <?= (isset($producto->es_favorito) && $producto->es_favorito) ? 'active' : '' ?>" data-id="<?= $producto->id_producto ?>">
@@ -373,7 +381,7 @@
         </div>
     </div>
 </footer> -->
-<?php include ('view/crudModal.php') ?>
+<?php include('view/crudModal.php') ?>
 
 
 <script>
@@ -422,53 +430,6 @@
 
         // Start the slideshow
         startSlideshow();
-    });
-
-    // Categories Load More Functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const loadMoreBtn = document.getElementById('load-more-categories');
-
-        if (loadMoreBtn) {
-            loadMoreBtn.addEventListener('click', function() {
-                const loaded = parseInt(this.dataset.loaded);
-                const total = parseInt(this.dataset.total);
-                const container = document.getElementById('categories-container');
-
-                // Add loading state
-                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Cargando...';
-                this.disabled = true;
-
-                // Simulate loading (replace with actual PHP/AJAX call)
-                setTimeout(() => {
-                    const categoriesToShow = Math.min(3, total - loaded);
-                    const newLoaded = loaded + categoriesToShow;
-
-                    // Here you would normally make an AJAX call to get more categories
-                    // For demo purposes, we'll show placeholder categories
-                    for (let i = 0; i < categoriesToShow; i++) {
-                        const categoryCard = document.createElement('div');
-                        categoryCard.className = 'category-card category-item fade-in-up';
-                        categoryCard.innerHTML = `
-                                <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Categoría" class="category-image">
-                                <div class="category-content">
-                                    <h4 class="category-title">Categoría ${loaded + i + 1}</h4>
-                                    <p class="category-description">Descubre los mejores productos</p>
-                                </div>
-                            `;
-                        container.appendChild(categoryCard);
-                    }
-
-                    this.dataset.loaded = newLoaded;
-
-                    if (newLoaded >= total) {
-                        this.style.display = 'none';
-                    } else {
-                        this.innerHTML = '<i class="fas fa-plus me-2"></i>Ver Más Categorías <span class="ms-2">(' + (total - newLoaded) + ' restantes)</span>';
-                        this.disabled = false;
-                    }
-                }, 1000);
-            });
-        }
     });
 
     // Original Scripts - MANTENER SIN CAMBIOS

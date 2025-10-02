@@ -752,7 +752,7 @@
                                 // Si el usuario elige imprimir
                                 if (printResult.isConfirmed) {
                                     // Abre una nueva ventana/pestaña para la impresión
-                                    window.open(urlFactura + data.id_venta, '_blank');
+                                    window.open('?c=factura&a=generarFactura&id_venta=' + data.id_venta + '&id_cliente=' + data.id_cliente, '_blank');
                                 }
                                 // Recargar la página (o redirigir, según tu flujo de eCommerce)
                                 location.href = 'index.php?c=cliente'; // Redirige a la página de pedidos o perfil

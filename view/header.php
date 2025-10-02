@@ -122,10 +122,9 @@ if (session_status() == PHP_SESSION_NONE) {
 
 <body>
     <?php if (isset($_SESSION['isLoggedIn']) && $_SESSION['isLoggedIn'] === true && $_SESSION['nivel'] == 1): ?>
-        <div class="wrapper">
+        <div class="d-flex wrapper" id="wrapper">
                 <?php include "sidebar.php"; ?>
-            <div style="width:100%;">
-                <div id="content" style="background-color: white">
+                <div id="content" class="flex-grow-1 p-4" style="background-color: white">
                 <?php else: ?>
                     <div class="d-flex wrapper" id="wrapper">
                         <div id="content" class="flex-grow-1 p-4">

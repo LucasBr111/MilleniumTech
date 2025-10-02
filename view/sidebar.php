@@ -26,14 +26,14 @@ function esActivo($a, $accion_actual) {
             </li>
             
             <li class="nav-item <?php echo esActivo('inicio', $accion_actual); ?>">
-                <a href="?c=dashboard&a=inicio" class="nav-link py-2 d-flex align-items-center">
+                <a href="?c=dashboard" class="nav-link py-2 d-flex align-items-center">
                     <i class="fas fa-chart-line me-3 fa-fw"></i> Dashboard
                 </a>
             </li>
             
             <li class="nav-item <?php echo esActivo('pedidos_pendientes', $accion_actual); ?>">
                 <a href="?c=dashboard&a=pedidos_pendientes" class="nav-link py-2 d-flex align-items-center">
-                    <i class="fas fa-shopping-cart me-3 fa-fw"></i> Pedidos Pendientes <span class="badge rounded-pill bg-danger ms-auto">23</span>
+                    <i class="fas fa-shopping-cart me-3 fa-fw"></i> Pedidos Pendientes <span class="badge rounded-pill bg-danger ms-auto"><?php echo $this->ventas->contarpendientes(); ?></span>
                 </a>
             </li>
             
@@ -92,9 +92,14 @@ function esActivo($a, $accion_actual) {
                 </a>
             </li> -->
 
-            <li class="nav-item <?php echo esActivo('reportes', $accion_actual); ?>">
+            <!-- <li class="nav-item <?php echo esActivo('reportes', $accion_actual); ?>">
                 <a href="?c=dashboard&a=reportes" class="nav-link py-2 d-flex align-items-center">
                     <i class="fas fa-chart-pie me-3 fa-fw"></i> Reportes & Analíticas
+                </a>
+            </li> -->
+            <li class="nav-item <?php echo esActivo('chat_ia', $accion_actual); ?>">
+                <a href="?c=dashboard&a=chat_ia" class="nav-link py-2 d-flex align-items-center">
+                    <i class="fas fa-robot me-3 fa-fw"></i> Chat IA Soporte
                 </a>
             </li>
             
@@ -102,11 +107,7 @@ function esActivo($a, $accion_actual) {
                 <p class="text-muted small fw-bold text-uppercase px-3 pt-3 mb-0">Utilidades</p>
             </li>
             
-            <li class="nav-item <?php echo esActivo('chat_ia', $accion_actual); ?>">
-                <a href="?c=dashboard&a=chat_ia" class="nav-link py-2 d-flex align-items-center">
-                    <i class="fas fa-robot me-3 fa-fw"></i> Chat IA Soporte
-                </a>
-            </li>
+  
     
             <div class="mt-auto border-top p-3">
                 <li class="nav-item">
