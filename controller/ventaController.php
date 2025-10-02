@@ -205,4 +205,32 @@ class ventaController
 
         // header('Location: index.php?c=cliente');
     }
+
+    // En tu clase VentaController.php
+public function obtenerDetalleVentaAjax()
+{
+    // 1. Verificar ID
+    if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'ID de venta inválido.']);
+        return;
+    }
+
+    $id_venta = (int)$_GET['id'];
+
+    // 2. Llamar al modelo
+    // NOTA: Asegúrate de que $this->model es una instancia de tu Modelo de Ventas
+    // y que tiene el método obtenerDetalleCompletoVenta().
+    $detalle = $this->model->obtenerDetalleCompletoVenta($id_venta);
+
+    header('Content-Type: application/json');
+
+    if ($detalle) {
+        // Devuelve la estructura: {cabecera: {...}, productos: [...]}
+        echo json_encode(['success' => true, 'data' => $detalle]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Venta no encontrada o sin detalles.']);
+    }
+    exit;
+}
 }

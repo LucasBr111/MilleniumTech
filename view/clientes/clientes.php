@@ -183,7 +183,7 @@
                                                 </button>
                                             <?php else: ?>
                                                 <!-- <a href="?c=venta&a=generarFactura&id_venta=<?php echo $compra->id_venta; ?>" class="btn-action btn-primary-action"></a> -->
-                                                <button class="admin-btn" data-bs-toggle="modal" data-bs-target="#crudModal" data-c="factura" data-id_venta="<?php echo $compra->id_venta; ?>" data-id_cliente="<?php echo $cliente->id; ?>">
+                                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#crudModal" data-c="factura" data-id_venta="<?php echo $compra->id_venta; ?>" data-id_cliente="<?php echo $cliente->id; ?>">
                                                     <i class="fas fa-file-invoice"></i> Factura/Ticket
                                                 </button>
                                                 <button class="btn-action btn-info-action" onclick="verDetalleCompra(<?php echo $compra->id_venta; ?>)">
@@ -309,9 +309,6 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn-primary-custom" onclick="descargarFactura()">
-                    <i class="fas fa-download"></i> Descargar Factura
-                </button>
             </div>
         </div>
     </div>
@@ -589,7 +586,7 @@
     // Función que se llama desde el botón "Confirmar" en la tabla
     function confirmarVenta(idVenta) {
         // Cargar datos de la venta
-        fetch(`index.php?c=venta&a=obtenerDetallesVenta&id=${idVenta}`)
+        fetch(`index.php?c=venta&a=obtnerProd&id=${idVenta}`)
             .then(response => response.text())
             .then(text => {
                 try {
@@ -783,5 +780,92 @@
     function formatearNumero(numero) {
         return Math.round(numero).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
+
+   /**
+ * Muestra el modal de detalles de compra y realiza una petición AJAX para obtener los datos.
+ * @param {number} idVenta El ID de la venta a consultar (usamos idVenta ya que estamos en contexto de ventas).
+ */
+function verDetalleCompra(idVenta) {
+    // Inicialización del Modal (Asume que Bootstrap está cargado)
+    const modal = new bootstrap.Modal(document.getElementById('modalDetalleCompra'));
+    const modalTitle = document.querySelector('#modalDetalleCompra .modal-title');
+
+    // 1. Mostrar el modal inmediatamente
+    modal.show();
+
+    // 2. Limpiar contenido anterior y mostrar estado de carga
+    document.getElementById('detalle_numero').textContent = 'Cargando...';
+    document.getElementById('detalle_fecha').textContent = 'Cargando...';
+    document.getElementById('detalle_estado').textContent = 'Cargando...';
+    document.getElementById('detalle_metodo_pago').textContent = 'Cargando...';
+    document.getElementById('detalle_total').textContent = 'Cargando...';
+    document.getElementById('detalle_productos').innerHTML = '<tr><td colspan="4" class="text-center">Cargando detalles de productos...</td></tr>';
+    
+    modalTitle.textContent = `Detalles de la Venta #${idVenta}`; // Ajustamos el texto a Venta
+
+    // 3. Petición AJAX (Fetch API)
+    // 📌 URL CORREGIDA: Apunta al controlador 'venta'
+    fetch(`?c=venta&a=obtenerDetalleVentaAjax&id=${idVenta}`)
+        .then(response => {
+            if (!response.ok) {
+                // Lanza un error si el estado HTTP no es 200 (ej. 404, 500)
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const detalles = data.data;
+
+                // A. Llenar la información del pedido (cabecera)
+                document.getElementById('detalle_numero').textContent = detalles.cabecera.id_venta || idVenta;
+                document.getElementById('detalle_fecha').textContent = detalles.cabecera.fecha;
+                document.getElementById('detalle_estado').textContent = detalles.cabecera.estado;
+                document.getElementById('detalle_metodo_pago').textContent = detalles.cabecera.metodo_pago;
+                
+                // Formatear el total
+                const totalFormateado = formatNumber(detalles.total) + ' Gs.';
+                document.getElementById('detalle_total').textContent = totalFormateado;
+
+                // B. Llenar la lista de productos
+                const tbody = document.getElementById('detalle_productos');
+                tbody.innerHTML = ''; // Limpiar
+                
+                if (detalles.productos && detalles.productos.length > 0) {
+                    detalles.productos.forEach(p => {
+                        const row = tbody.insertRow();
+                        // Nota: Usamos 'subtotal' que calculamos en el modelo
+                        row.innerHTML = `
+                            <td>${p.nombre_producto}</td>
+                            <td>${p.cantidad}</td>
+                            <td>${formatNumber(p.precio_unitario)} Gs.</td>
+                            <td>${formatNumber(p.subtotal)} Gs.</td>
+                        `;
+                    });
+                } else {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `<td colspan="4" class="text-center text-muted">No se encontraron productos para esta venta.</td>`;
+                }
+
+            } else {
+                console.error("Error de la API:", data.message);
+                document.getElementById('detalle_productos').innerHTML = `<tr><td colspan="4" class="text-center text-danger">Error: ${data.message}</td></tr>`;
+            }
+        })
+        .catch(error => {
+            console.error("Error en la solicitud Fetch:", error);
+            document.getElementById('detalle_productos').innerHTML = `<tr><td colspan="4" class="text-center text-danger">Ocurrió un error al conectar con el servidor.</td></tr>`;
+        });
+}
+
+// Función auxiliar para formato (debe existir en el archivo JS principal)
+function formatNumber(num) {
+    if (typeof num === 'string') num = parseFloat(num);
+    return num.toLocaleString('es-PY', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
+}
+
 </script>
 <?php include('view/crudModal.php'); ?>

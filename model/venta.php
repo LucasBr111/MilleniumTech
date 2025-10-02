@@ -282,7 +282,8 @@ class venta
         }
     }
 
-    public function listarpendientes(){
+    public function listarpendientes()
+    {
         try {
             $sql = "SELECT v.*, 
                            c.nombre AS cliente_nombre,
@@ -292,7 +293,7 @@ class venta
                     LEFT JOIN productos p ON v.id_producto = p.id_producto
                     WHERE v.estado_pago = 'pendiente'
                     ORDER BY v.fecha_venta DESC";
-            
+
             $stm = $this->pdo->prepare($sql);
             $stm->execute();
             return $stm->fetchAll(PDO::FETCH_OBJ);
@@ -302,9 +303,9 @@ class venta
     }
 
     public function listarPagados()
-{
-    try {
-        $sql = "SELECT v.*, 
+    {
+        try {
+            $sql = "SELECT v.*, 
                        c.nombre AS cliente_nombre, 
                        p.nombre_producto AS producto_nombre
                 FROM ventas v
@@ -312,27 +313,100 @@ class venta
                 LEFT JOIN productos p ON v.id_producto = p.id_producto
                 WHERE v.estado_pago = 'pagado'
                 ORDER BY v.fecha_venta DESC";
-        
-        $stm = $this->pdo->prepare($sql);
-        $stm->execute();
-        return $stm->fetchAll(PDO::FETCH_OBJ);
-    } catch (Exception $e) {
-        die($e->getMessage());
-    }
-}
 
-public function contarPendientes()
-{
-    try {
-        $stm = $this->pdo->query("SELECT COUNT(*) as total_pendientes FROM ventas WHERE estado_pago = 'pendiente'");
-        $result = $stm->fetch(PDO::FETCH_OBJ);
-        return (int)$result->total_pendientes;
-    } catch (Exception $e) {
-        die($e->getMessage());
+            $stm = $this->pdo->prepare($sql);
+            $stm->execute();
+            return $stm->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
     }
 
-    
-}
+    public function contarPendientes()
+    {
+        try {
+            $stm = $this->pdo->query("SELECT COUNT(*) as total_pendientes FROM ventas WHERE estado_pago = 'pendiente'");
+            $result = $stm->fetch(PDO::FETCH_OBJ);
+            return (int)$result->total_pendientes;
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
 
-   
+    public function obtenerDetalleCompletoVenta($id_venta)
+    {
+        try {
+            // La consulta utiliza GROUP BY para asegurar que los campos de cabecera sean únicos 
+            // y SUM() para calcular el total general de la venta.
+            $sql = "SELECT 
+                    -- Columnas para la CABECERA (agrupadas)
+                    v.id_venta,
+                    MAX(v.fecha_venta) as fecha,           -- Usamos MAX/MIN para obtener la fecha
+                    v.estado_pago as estado, 
+                    mp.nombre as metodo_pago,
+                    SUM(v.total) as total_final,           -- SUMAMOS el total de cada línea para el total general
+                    
+                    -- Columnas para el DETALLE (agrupadas)
+                    p.nombre_producto,
+                    v.cantidad,
+                    v.precio_unitario,
+                    v.descuento,
+                    (v.cantidad * v.precio_unitario * (1 - v.descuento/100)) AS subtotal_linea
+                FROM ventas v
+                JOIN productos p ON v.id_producto = p.id_producto
+                LEFT JOIN metodos_pago mp ON v.metodo_pago = mp.id
+                WHERE v.id_venta = ?
+                GROUP BY 
+                    v.id_venta, v.estado_pago, v.metodo_pago, v.cantidad, 
+                    v.precio_unitario, v.descuento, p.nombre_producto 
+                ORDER BY p.nombre_producto";
+
+            $stm = $this->pdo->prepare($sql);
+            $stm->execute([$id_venta]);
+            $resultados = $stm->fetchAll(PDO::FETCH_OBJ);
+
+            if (empty($resultados)) {
+                return null; // Venta no encontrada o sin productos
+            }
+
+            // --- PROCESAMIENTO PARA SEPARAR CABECERA Y DETALLE ---
+
+            $productos = [];
+            $primer_registro = $resultados[0]; // Usamos la primera fila para la cabecera
+
+            // 1. Cabecera (Usamos el total_final sumado por la consulta)
+            $cabecera = (object)[
+                'id_venta'    => $primer_registro->id_venta,
+                'fecha'       => $primer_registro->fecha,
+                'estado'      => $primer_registro->estado,
+                'metodo_pago' => $primer_registro->metodo_pago,
+                'total'       => $primer_registro->total_final // Este es el total general de la venta
+            ];
+
+            // 2. Detalle de Productos
+            // Iteramos sobre todos los resultados (que ya son las líneas de producto)
+            $total = 0;
+            foreach ($resultados as $row) {
+                $productos[] = (object)[
+                    'nombre_producto'  => $row->nombre_producto,
+                    'cantidad'         => $row->cantidad,
+                    'precio_unitario'  => $row->precio_unitario,
+                    // Calculamos el subtotal de la línea (incluye el descuento y el precio unitario original)
+                    'subtotal'         => $row->subtotal_linea
+                ];
+                $total += $row->subtotal_linea; 
+            }
+
+            // Retornamos la estructura esperada por JavaScript
+            return [
+                'cabecera' => $cabecera,
+                'productos' => $productos,
+                'total' => $total // Total calculado en PHP para mayor precisión
+            ];
+        } catch (Exception $e) {
+            // En producción, es crucial usar error_log para capturar errores de base de datos
+            error_log("Error al obtener detalles de venta (Estructura única): " . $e->getMessage());
+            return null;
+        }
+    }
 }
